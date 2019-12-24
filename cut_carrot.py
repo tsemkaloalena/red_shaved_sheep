@@ -60,7 +60,10 @@ cut.add(spritecut)
 
 def check_cut():
     if pygame.sprite.collide_mask(spriteline, spritecut):
-        print(1)
+        m1 = spriteline.mask
+        m2 = spritecut.mask
+        m = m1.overlap_mask(m2, (0, 0))
+        print(m.count() > m1.count() - 50)
 
 
 start_to_cut = False

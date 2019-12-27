@@ -22,7 +22,7 @@ clock = pygame.time.Clock()
 
 
 class ProductToCut(pygame.sprite.Sprite):
-    def __init__(self, product, lines, cut_product, size_x, size_y, x, y, group):
+    def __init__(self, product, lines, cut_product, size_x, size_y, x, y, *group):
         super().__init__(group)
         self.drawing = True
         self.start_to_cut = False

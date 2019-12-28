@@ -19,48 +19,61 @@ width, height = 500, 500
 size = width, height
 screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
-all_sprites = pygame.sprite.Group()
-ovensprite = pygame.sprite.Group()
-buttongroup = pygame.sprite.Group()
-
 
 class Oven(pygame.sprite.Sprite):
-    def __init__(self, sheet, columns, rows, x, y):
-        super().__init__(ovensprite)
-        self.frames = []
-        self.cut_sheet(sheet, columns, rows)
-        self.cur_frame = 0
-        self.image = self.frames[self.cur_frame]
-        self.rect = self.rect.move(x, y)
+    def __init__(self):
+        super().__init__()
+        self.all_sprites = pygame.sprite.Group()
+        self.ovengroup = pygame.sprite.Group()
+        self.buttongroup = pygame.sprite.Group()
 
-    def cut_sheet(self, sheet, columns, rows):
-        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
-                                sheet.get_height() // rows)
-        for j in range(rows):
-            for i in range(columns):
-                frame_location = (self.rect.w * i, self.rect.h * j)
-                self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
-                self.mask = pygame.mask.from_surface(sheet)
+        self.ovenon = False
+        self.ovenopen = False
 
-    def update(self):
-        self.cur_frame = (self.cur_frame + 1) % len(self.frames)
-        self.image = self.frames[self.cur_frame]
+        self.closedoven = load_image("closedoven.png", -1)
+        self.workingoven = load_image("workingoven.png", -1)
+        self.openoven = load_image("openoven.png", -1)
+
+        self.oven = pygame.transform.scale(self.closedoven, [500, 500])
+        self.ovensprite = pygame.sprite.Sprite()
+        self.ovensprite.image = self.oven
+        self.ovensprite.rect = self.ovensprite.image.get_rect()
+        self.ovengroup.add(self.ovensprite)
+        self.ovensprite.rect.x = 0
+        self.ovensprite.rect.y = 0
+
+        self.buttonoff = load_image("off.png", -1)
+        self.buttonon = load_image("on.png", -1)
+        self.buttonoff = pygame.transform.scale(self.buttonoff, [20, 20])
+        self.buttonon = pygame.transform.scale(self.buttonon, [20, 20])
+        self.buttonsprite = pygame.sprite.Sprite()
+        self.buttonsprite.image = self.buttonoff
+        self.buttonsprite.rect = self.buttonsprite.image.get_rect()
+        self.buttongroup.add(self.buttonsprite)
+        self.buttonsprite.rect.x = 240
+        self.buttonsprite.rect.y = 60
+
+    def update(self, type):
+        if type == 1:
+            if self.buttonsprite.rect.collidepoint(event.pos):
+                if self.ovenon and not(self.ovenopen):
+                    self.ovenon = False
+                    self.ovensprite.image = pygame.transform.scale(self.closedoven, [500, 500])
+                    self.buttonsprite.image = self.buttonoff
+                elif not(oven.ovenon) and not(oven.ovenopen):
+                    self.ovenon = True
+                    self.ovensprite.image = pygame.transform.scale(self.workingoven, [500, 500])
+                    self.buttonsprite.image = self.buttonon
+        else:
+            if self.ovenopen:
+                self.ovenopen = False
+                self.ovensprite.image = pygame.transform.scale(self.closedoven, [500, 500])
+            elif not(self.ovenopen) and not(self.ovenon):
+                self.ovenopen = True
+                self.ovensprite.image = pygame.transform.scale(self.openoven, [500, 500])
 
 
-oven = Oven(pygame.transform.scale(load_image("closedoven.png", -1), (500, 500)), 1, 1, 0, 0)
-ovenon = False
-ovenopen = False
-
-buttonoff = load_image("off.png", -1)
-buttonon = load_image("on.png", -1)
-buttonoff = pygame.transform.scale(buttonoff, [20, 20])
-buttonon = pygame.transform.scale(buttonon, [20, 20])
-buttonsprite = pygame.sprite.Sprite()
-buttonsprite.image = buttonoff
-buttonsprite.rect = buttonsprite.image.get_rect()
-buttongroup.add(buttonsprite)
-buttonsprite.rect.x = 240
-buttonsprite.rect.y = 65
+oven = Oven()
 
 running = True
 while running:
@@ -69,30 +82,13 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if buttonsprite.rect.collidepoint(event.pos):
-                if ovenon and not(ovenopen):
-                    ovenon = False
-                    ovensprite.remove(oven)
-                    oven = Oven(pygame.transform.scale(load_image("closedoven.png", -1), (500, 500)), 1, 1, 0, 0)
-                    buttonsprite.image = buttonoff
-                elif not(ovenon) and not(ovenopen):
-                    ovenon = True
-                    ovensprite.remove(oven)
-                    oven = Oven(pygame.transform.scale(load_image("workingoven.png", -1), (500, 500)), 1, 1, 0, 0)
-                    buttonsprite.image = buttonon
-            elif oven.rect.collidepoint(event.pos):
-                if ovenopen:
-                    ovenopen = False
-                    ovensprite.remove(oven)
-                    oven = Oven(pygame.transform.scale(load_image("closedoven.png", -1), (500, 500)), 1, 1, 0, 0)
-                elif not(ovenopen) and not(ovenon):
-                    ovenopen = True
-                    ovensprite.remove(oven)
-                    oven = Oven(pygame.transform.scale(load_image("openoven.png", -1), (500, 500)), 1, 1, 0, 0)
-    ovensprite.update()
+            if oven.buttonsprite.rect.collidepoint(event.pos):
+                oven.update(1)
+            elif oven.ovensprite.rect.collidepoint(event.pos):
+                oven.update(0)
     screen.fill((0, 0, 0))
-    ovensprite.draw(screen)
-    buttongroup.draw(screen)
+    oven.ovengroup.draw(screen)
+    oven.buttongroup.draw(screen)
     pygame.display.flip()
     clock.tick(10)
 pygame.quit()

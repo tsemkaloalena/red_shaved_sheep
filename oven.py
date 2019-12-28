@@ -21,14 +21,17 @@ screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
 
 class Oven(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, product):
         super().__init__()
+        self.pr = product
         self.all_sprites = pygame.sprite.Group()
         self.ovengroup = pygame.sprite.Group()
         self.buttongroup = pygame.sprite.Group()
+        self.product = pygame.sprite.Group()
 
         self.ovenon = False
         self.ovenopen = False
+        self.slide = False
 
         self.closedoven = load_image("closedoven.png", -1)
         self.workingoven = load_image("workingoven.png", -1)
@@ -41,6 +44,16 @@ class Oven(pygame.sprite.Sprite):
         self.ovengroup.add(self.ovensprite)
         self.ovensprite.rect.x = 0
         self.ovensprite.rect.y = 0
+
+        self.image = load_image(product, -1)
+        self.image = pygame.transform.scale(self.image, [150, 150])
+        self.sprite = pygame.sprite.Sprite()
+        self.sprite.image = self.image
+        self.sprite.mask = pygame.mask.from_surface(self.sprite.image)
+        self.sprite.rect = self.sprite.image.get_rect()
+        self.product.add(self.sprite)
+        self.sprite.rect.x = 170
+        self.sprite.rect.y = 350
 
         self.buttonoff = load_image("off.png", -1)
         self.buttonon = load_image("on.png", -1)
@@ -60,20 +73,37 @@ class Oven(pygame.sprite.Sprite):
                     self.ovenon = False
                     self.ovensprite.image = pygame.transform.scale(self.closedoven, [500, 500])
                     self.buttonsprite.image = self.buttonoff
+                    if self.slide:
+                        self.sprite.rect.x = 170
+                        self.sprite.rect.y = 350
                 elif not(oven.ovenon) and not(oven.ovenopen):
                     self.ovenon = True
                     self.ovensprite.image = pygame.transform.scale(self.workingoven, [500, 500])
                     self.buttonsprite.image = self.buttonon
+                    if self.slide:
+                        self.sprite.image = pygame.transform.scale(load_image(self.pr[0:-4]+'_done.png', -1), [150, 150])
+        if type == 2:
+            if not(self.slide) and self.ovenopen:
+                self.slide = True
+                self.sprite.rect.x = 170
+                self.sprite.rect.y = 170
         else:
             if self.ovenopen:
                 self.ovenopen = False
                 self.ovensprite.image = pygame.transform.scale(self.closedoven, [500, 500])
+                if self.slide:
+                    self.sprite.rect.x = -150
+                    self.sprite.rect.y = -150
             elif not(self.ovenopen) and not(self.ovenon):
                 self.ovenopen = True
                 self.ovensprite.image = pygame.transform.scale(self.openoven, [500, 500])
+                if self.slide:
+                    self.sprite.rect.x = 170
+                    self.sprite.rect.y = 350
 
 
-oven = Oven()
+
+oven = Oven("turkey.png")
 
 running = True
 while running:
@@ -82,13 +112,17 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if oven.buttonsprite.rect.collidepoint(event.pos):
+            if oven.sprite.rect.collidepoint(event.pos):
+
+                oven.update(2)
+            elif oven.buttonsprite.rect.collidepoint(event.pos):
                 oven.update(1)
             elif oven.ovensprite.rect.collidepoint(event.pos):
                 oven.update(0)
     screen.fill((0, 0, 0))
     oven.ovengroup.draw(screen)
     oven.buttongroup.draw(screen)
+    oven.product.draw(screen)
     pygame.display.flip()
     clock.tick(10)
 pygame.quit()

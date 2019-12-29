@@ -20,13 +20,14 @@ size = width, height
 screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
 all_sprites = pygame.sprite.Group()
-mixers = pygame.sprite.Group()
+peppers = pygame.sprite.Group()
 button = pygame.sprite.Group()
+time = 50
 
 
-class Mixer(pygame.sprite.Sprite):
+class Pepper(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
-        super().__init__(mixers)
+        super().__init__(peppers)
         self.frames = []
         self.cut_sheet(sheet, columns, rows)
         self.cur_frame = 0
@@ -47,20 +48,24 @@ class Mixer(pygame.sprite.Sprite):
         self.image = self.frames[self.cur_frame]
 
 
-mixer = Mixer(pygame.transform.scale(load_image("pepper.png", -1), (66, 120)), 1, 1, 100, 50)
+pepper = Pepper(pygame.transform.scale(load_image("pepper.png", -1), (66, 120)), 1, 1, 350, 350)
 # mixer = Mixer(pygame.transform.scale(load_image("pepper5.png", -1), (400, 241)), 2, 1, 100, 50)
-mixing = False
+peppering = False
 
 running = True
 while running:
     # screen.fill((0, 0, 0))
-    screen.fill((0, 255, 0))
+    screen.fill((0, 255, 100))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if mixer.rect.collidepoint(event.pos):
-                mixer = Mixer(pygame.transform.scale(load_image("pepper5.png", -1), (400, 241)), 2, 1, 100, 50)
+            if pepper.rect.collidepoint(event.pos):
+                if not peppering:
+                    peppers.remove(pepper)
+                    pepper = Pepper(pygame.transform.scale(load_image("pepper5.png", -1), (400, 241)), 2, 1, 100, 50)
+                    peppering = True
+
         #         if mixing:
         #             mixing = False
         #             mixers.remove(mixer)
@@ -69,9 +74,15 @@ while running:
         #             mixing = True
         #             mixers.remove(mixer)
         #             mixer = Mixer(pygame.transform.scale(load_image("mixer_on.png", -1), (400, 200)), 2, 1, 100, 50)
-    mixers.update()
-    # screen.fill((0, 0, 0))
-    mixers.draw(screen)
+    peppers.update()
+    if peppering:
+        time -= 1
+    if time <= 0:
+        peppers.remove(pepper)
+        pepper = Pepper(pygame.transform.scale(load_image("pepper.png", -1), (66, 120)), 1, 1, 350, 350)
+        peppering = False
+        time = 50
+    peppers.draw(screen)
     pygame.display.flip()
     clock.tick(10)
 pygame.quit()

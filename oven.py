@@ -189,6 +189,9 @@ while running:
     time_rect.y = 5
     if oven.level_done == 0:
         time -= 1
+    if time == 0:
+        print('Вы проиграли!')
+        running = False
     all_sprites.update()
     screen.fill((0, 0, 0))
     oven.ovengroup.draw(screen)

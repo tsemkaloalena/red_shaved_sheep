@@ -107,5 +107,5 @@ while running:
         orange.lines.draw(screen)
         orange.already_cut.draw(screen)
     pygame.display.flip()
-    clock.tick(50)
+    clock.tick(90)
 pygame.quit()

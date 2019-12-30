@@ -93,4 +93,5 @@ while running:
         oil.brush.draw(screen)
     oil.brush.update()
     pygame.display.flip()
+    clock.tick(90)
 pygame.quit()

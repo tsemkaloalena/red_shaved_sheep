@@ -50,7 +50,6 @@ class PourInProduct(pygame.sprite.Sprite):
 
 pepper = PourInProduct(pygame.transform.scale(load_image("pepper.png", -1), (66, 120)), 1, 1, 350, 350)
 pouring_in = False
-
 running = True
 while running:
     screen.fill((0, 255, 100))
@@ -61,7 +60,7 @@ while running:
             if pepper.rect.collidepoint(event.pos):
                 if not pouring_in:
                     pour_in_products.remove(pepper)
-                    pepper = PourInProduct(pygame.transform.scale(load_image("pepper5.png", -1), (400, 241)), 2, 1, 100, 50)
+                    pepper = PourInProduct(pygame.transform.scale(load_image("pepper2.png", -1), (352, 241)), 2, 1, 100, 50)
                     pouring_in = True
     pour_in_products.update()
     if pouring_in:

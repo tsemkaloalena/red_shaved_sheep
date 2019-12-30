@@ -22,17 +22,17 @@ clock = pygame.time.Clock()
 
 
 class Oil(pygame.sprite.Sprite):
-    def __init__(self, size, x, y, *group):
+    def __init__(self, bowl_size, bowl_x, bowl_y, *group):
         super().__init__(group)
         self.bowls = pygame.sprite.Group()
         self.brush = pygame.sprite.Group()
-        self.bowl_size = size, size
+        self.bowl_size = bowl_size, bowl_size
         self.bowl_image = pygame.transform.scale(load_image('oil_with_brush.png', -1), self.bowl_size)
         self.bowl = pygame.sprite.Sprite(self.bowls)
         self.bowl.image = self.bowl_image
         self.bowl.rect = self.bowl.image.get_rect()
-        self.bowl.rect.x = x
-        self.bowl.rect.y = y
+        self.bowl.rect.x = bowl_x
+        self.bowl.rect.y = bowl_y
 
         self.cursor_image = load_image('brush.png', -1)
         self.cursor_image = pygame.transform.scale(self.cursor_image, (20, 100))

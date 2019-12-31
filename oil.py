@@ -21,8 +21,9 @@ screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
 
 
-class ProductToCut(pygame.sprite.Sprite):
-    def __init__(self, product, oiled_product, product_size_x, product_size_y, product_x, product_y, bowl_size, bowl_x, bowl_y, *group):
+class ProductToOil(pygame.sprite.Sprite):
+    def __init__(self, product, oiled_product, product_size_x, product_size_y, product_x, product_y, bowl_size, bowl_x,
+                 bowl_y, *group):
         super().__init__(group)
         self.bowls = pygame.sprite.Group()
         self.brush = pygame.sprite.Group()
@@ -34,8 +35,7 @@ class ProductToCut(pygame.sprite.Sprite):
         self.bowl.rect.x = bowl_x
         self.bowl.rect.y = bowl_y
 
-        self.cursor_image = load_image('brush.png', -1)
-        self.cursor_image = pygame.transform.scale(self.cursor_image, (20, 100))
+        self.cursor_image = pygame.transform.scale(load_image('brush.png', -1), (20, 100))
         self.cursor = pygame.sprite.Sprite(self.brush)
         self.cursor.image = self.cursor_image
         self.cursor.rect = self.cursor.image.get_rect()
@@ -119,7 +119,7 @@ class ProductToCut(pygame.sprite.Sprite):
 
 running = True
 oiling = False
-oil = ProductToCut("orange.png", "oiled_orange.png", 300, 189, 50, 100, 100, 300, 300)
+oil = ProductToOil("orange.png", "oiled_orange.png", 300, 189, 50, 100, 100, 300, 300)
 
 while running:
     screen.fill((0, 0, 0))

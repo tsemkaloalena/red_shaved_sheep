@@ -15,6 +15,13 @@ def load_image(name, colorkey=None):
     return image
 
 
+def load_level(filename):
+    filename = "data/levels/" + filename
+    with open(filename, 'r') as mapFile:
+        level_map = [line.strip() for line in mapFile]
+    return level_map[0], level_map[1::]
+
+
 class ProductToCut(pygame.sprite.Sprite):
     def __init__(self, product, lines, cut_product, size_x, size_y, x, y, *group):
         super().__init__(group)
@@ -110,45 +117,67 @@ time_rect = timetext.get_rect()
 time_rect.x = 470
 time_rect.y = 51
 
-product = ProductToCut("carrot.png", "carrot_lines.png", "cut_carrot.png", 240, 63, 0, 400)
+stage, things_to_place = load_level('1.txt')  # стадия, на которой мы находимся, нужна будет при сборке всей игры
+startpos = 0
+everything = []
+positions = []
+for i in things_to_place:
+    st = i.split()
+    product = ProductToCut(st[0] + '.png', st[0] + '_lines.png', "cut_" + st[0] + ".png", int(st[1]), int(st[2]), 0,
+                           startpos)
+    positions.append(startpos)
+    startpos += int(st[2]) + 10
+    everything.append(product)
 
+temp_product = -1
 while running:
     screen.blit(fon, (0, 0))
     for event in pygame.event.get():
         if event.type == pygame.QUIT or time == 0:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if product.drawing:
-                product.start_to_cut = True
+            if temp_product == -1:
+                for i in range(len(everything)):
+                    if everything[i].sprite.rect.collidepoint(event.pos):
+                        if 'cut_' not in everything[temp_product].name:
+                            everything[i].sprite.rect.x = 230
+                            everything[i].sprite.rect.y = 200
+                            everything[i].spriteline.rect.x = 230
+                            everything[i].spriteline.rect.y = 200
+                            everything[i].spritecut.rect.x = 230
+                            everything[i].spritecut.rect.y = 200
+                            everything[i].x, everything[i].y = 230, 200
+                            everything[i].start_to_cut = True
+                            everything[i].drawing = True
+                            temp_product = i
+                        break
             else:
-                if product.sprite.rect.collidepoint(event.pos) and 'cut_' not in product.name:
-                    product.sprite.rect.x = 230
-                    product.sprite.rect.y = 200
-                    product.spriteline.rect.x = 230
-                    product.spriteline.rect.y = 200
-                    product.spritecut.rect.x = 230
-                    product.spritecut.rect.y = 200
-                    product.x, product.y = 230, 200
-                    product.start_to_cut = True
-                    product.drawing = True
-                elif product.sprite.rect.collidepoint(event.pos) and 'cut_' in product.name:
-                    product.sprite.rect.x = 5
-                    product.sprite.rect.y = 400
-                    product.start_to_cut = False
-                    product.drawing = False
+                if everything[temp_product].drawing:
+                    everything[temp_product].start_to_cut = True
+                elif everything[temp_product].sprite.rect.collidepoint(event.pos) and 'cut_' in everything[
+                    temp_product].name:
+                    everything[temp_product].sprite.rect.x = 0
+                    everything[temp_product].sprite.rect.y = positions[temp_product]
+                    everything[temp_product].start_to_cut = False
+                    everything[temp_product].drawing = False
+                    temp_product = -1
 
         if event.type == pygame.MOUSEBUTTONUP:
-            if product.drawing:
-                product.start_to_cut = False
-                product.spritecut.image = product.board
-                product.spritecut.mask = pygame.mask.from_surface(product.spritecut.image)
-                product.check_cut()
+            if temp_product != -1:
+                if everything[temp_product].drawing:
+                    everything[temp_product].start_to_cut = False
+                    everything[temp_product].spritecut.image = everything[temp_product].board
+                    everything[temp_product].spritecut.mask = pygame.mask.from_surface(
+                        everything[temp_product].spritecut.image)
+                    everything[temp_product].check_cut()
 
-        if event.type == pygame.MOUSEMOTION and product.drawing:
-            if product.start_to_cut:
-                pygame.draw.circle(product.board, (0, 0, 255), (event.pos[0] - product.x, event.pos[1] - product.y),
-                                   5)
-                product.spritecut.image = product.board
+        if event.type == pygame.MOUSEMOTION and everything[temp_product] != -1:
+            if everything[temp_product].drawing:
+                if everything[temp_product].start_to_cut:
+                    pygame.draw.circle(everything[temp_product].board, (0, 0, 255), (
+                        event.pos[0] - everything[temp_product].x, event.pos[1] - everything[temp_product].y),
+                                       5)
+                    everything[temp_product].spritecut.image = everything[temp_product].board
 
     timetext = font.render(str(time), 1, (255, 255, 255))
     time_rect = timetext.get_rect()
@@ -157,10 +186,11 @@ while running:
     time -= 1
     screen.blit(string_rendered, intro_rect)
     screen.blit(timetext, time_rect)
-    product.product.draw(screen)
-    if product.drawing:
-        product.lines.draw(screen)
-        product.already_cut.draw(screen)
+    for product in everything:
+        product.product.draw(screen)
+        if product.drawing:
+            product.lines.draw(screen)
+            product.already_cut.draw(screen)
     pygame.display.flip()
     clock.tick(10)
 pygame.quit()

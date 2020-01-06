@@ -1,0 +1,5 @@
+cut
+carrot 240 63
+apple 150 120
+orange 200 130
+rosemary 200 117

@@ -83,6 +83,24 @@ class ProductToCut(pygame.sprite.Sprite):
                 self.drawing = False
                 return True
 
+    def check_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            self.start_to_cut = True
+        if event.type == pygame.MOUSEBUTTONUP:
+            self.start_to_cut = False
+            self.spritecut.image = self.board
+            self.spritecut.mask = pygame.mask.from_surface(self.spritecut.image)
+            self.check_cut()
+        if self.start_to_cut and event.type == pygame.MOUSEMOTION:
+            pygame.draw.circle(self.board, (0, 0, 255), (event.pos[0] - self.x, event.pos[1] - self.y), 8)
+            self.spritecut.image = self.board
+
+    def draw_on_screen(self):
+        self.product.draw(screen)
+        if self.drawing:
+            self.lines.draw(screen)
+            self.already_cut.draw(screen)
+
 
 running = True
 orange = ProductToCut("orange.png", "orange_lines.png", "cut_orange.png", 300, 189, 50, 100)
@@ -92,20 +110,8 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            orange.start_to_cut = True
-        if event.type == pygame.MOUSEBUTTONUP:
-            orange.start_to_cut = False
-            orange.spritecut.image = orange.board
-            orange.spritecut.mask = pygame.mask.from_surface(orange.spritecut.image)
-            orange.check_cut()
-        if orange.start_to_cut and event.type == pygame.MOUSEMOTION:
-            pygame.draw.circle(orange.board, (0, 0, 255), (event.pos[0] - orange.x, event.pos[1] - orange.y), 5)
-            orange.spritecut.image = orange.board
-    orange.product.draw(screen)
-    if orange.drawing:
-        orange.lines.draw(screen)
-        orange.already_cut.draw(screen)
+        orange.check_event(event)
+    orange.draw_on_screen()
     pygame.display.flip()
-    clock.tick(90)
+    clock.tick(50)
 pygame.quit()

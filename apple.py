@@ -83,6 +83,24 @@ class ProductToCut(pygame.sprite.Sprite):
                 self.drawing = False
                 return True
 
+    def check_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            self.start_to_cut = True
+        if event.type == pygame.MOUSEBUTTONUP:
+            self.start_to_cut = False
+            self.spritecut.image = self.board
+            self.spritecut.mask = pygame.mask.from_surface(self.spritecut.image)
+            self.check_cut()
+        if self.start_to_cut and event.type == pygame.MOUSEMOTION:
+            pygame.draw.circle(self.board, (0, 0, 255), (event.pos[0] - self.x, event.pos[1] - self.y), 8)
+            self.spritecut.image = self.board
+
+    def draw_on_screen(self):
+        self.product.draw(screen)
+        if self.drawing:
+            self.lines.draw(screen)
+            self.already_cut.draw(screen)
+
 
 running = True
 apple = ProductToCut("apple.png", "apple_lines.png", "cut_apple.png", 300, 234, 50, 100)
@@ -92,20 +110,8 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            apple.start_to_cut = True
-        if event.type == pygame.MOUSEBUTTONUP:
-            apple.start_to_cut = False
-            apple.spritecut.image = apple.board
-            apple.spritecut.mask = pygame.mask.from_surface(apple.spritecut.image)
-            apple.check_cut()
-        if apple.start_to_cut and event.type == pygame.MOUSEMOTION:
-            pygame.draw.circle(apple.board, (0, 0, 255), (event.pos[0] - apple.x, event.pos[1] - apple.y), 5)
-            apple.spritecut.image = apple.board
-    apple.product.draw(screen)
-    if apple.drawing:
-        apple.lines.draw(screen)
-        apple.already_cut.draw(screen)
+        apple.check_event(event)
+    apple.draw_on_screen()
     pygame.display.flip()
     clock.tick(50)
 pygame.quit()

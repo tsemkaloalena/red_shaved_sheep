@@ -25,6 +25,7 @@ class ProductToOil(pygame.sprite.Sprite):
     def __init__(self, product, oiled_product, product_size_x, product_size_y, product_x, product_y, bowl_size, bowl_x,
                  bowl_y, *group):
         super().__init__(group)
+        self.oiling = False
         self.bowls = pygame.sprite.Group()
         self.brush = pygame.sprite.Group()
         self.bowl_size = bowl_size, bowl_size
@@ -88,14 +89,14 @@ class ProductToOil(pygame.sprite.Sprite):
                 return True
 
     def change_cursor(self):
-        if oiling:
+        if self.oiling:
             pygame.mouse.set_visible(False)
             self.cursor.rect.bottomleft = event.pos
         else:
             pygame.mouse.set_visible(True)
 
     def change_bowl(self):
-        if oiling:
+        if self.oiling:
             x = self.bowl.rect.x
             y = self.bowl.rect.y
             self.bowls.remove(self.bowl)
@@ -116,9 +117,40 @@ class ProductToOil(pygame.sprite.Sprite):
             self.bowl.rect.x = x
             self.bowl.rect.y = y
 
+    def draw_on_screen(self):
+        self.product.draw(screen)
+        if self.drawing:
+            self.already_oil.draw(screen)
+        self.bowls.update()
+        self.bowls.draw(screen)
+        if pygame.mouse.get_focused() and self.oiling:
+            self.brush.draw(screen)
+        self.brush.update()
+
+    def check_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.oiling:
+                self.start_to_oil = True
+        if event.type == pygame.MOUSEBUTTONUP:
+            self.start_to_oil = False
+            self.oiled.image = self.board
+            self.oiled.mask = pygame.mask.from_surface(self.oiled.image)
+            self.check_oil()
+        if self.start_to_oil and event.type == pygame.MOUSEMOTION:
+            pygame.draw.circle(self.board, (255, 255, 0), (event.pos[0] - self.x, event.pos[1] - self.y), 15)
+            self.oiled.image = self.board
+        if event.type == pygame.MOUSEMOTION:
+            self.change_cursor()
+        if event.type == pygame.MOUSEBUTTONDOWN and self.bowl.rect.collidepoint(event.pos):
+            if self.oiling:
+                self.oiling = False
+                self.change_bowl()
+            else:
+                self.oiling = True
+                self.change_bowl()
+
 
 running = True
-oiling = False
 oil = ProductToOil("orange.png", "oiled_orange.png", 300, 189, 50, 100, 100, 300, 300)
 
 while running:
@@ -126,35 +158,8 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if oiling:
-                oil.start_to_oil = True
-        if event.type == pygame.MOUSEBUTTONUP:
-            oil.start_to_oil = False
-            oil.oiled.image = oil.board
-            oil.oiled.mask = pygame.mask.from_surface(oil.oiled.image)
-            oil.check_oil()
-        if oil.start_to_oil and event.type == pygame.MOUSEMOTION:
-            pygame.draw.circle(oil.board, (255, 255, 0), (event.pos[0] - oil.x, event.pos[1] - oil.y), 15)
-            oil.oiled.image = oil.board
-
-        if event.type == pygame.MOUSEMOTION:
-            oil.change_cursor()
-        if event.type == pygame.MOUSEBUTTONDOWN and oil.bowl.rect.collidepoint(event.pos):
-            if oiling:
-                oiling = False
-                oil.change_bowl()
-            else:
-                oiling = True
-                oil.change_bowl()
-    oil.product.draw(screen)
-    if oil.drawing:
-        oil.already_oil.draw(screen)
-    oil.bowls.update()
-    oil.bowls.draw(screen)
-    if pygame.mouse.get_focused() and oiling:
-        oil.brush.draw(screen)
-    oil.brush.update()
+        oil.check_event(event)
+    oil.draw_on_screen()
     pygame.display.flip()
     clock.tick(90)
 pygame.quit()

@@ -83,6 +83,24 @@ class ProductToCut(pygame.sprite.Sprite):
                 self.drawing = False
                 return True
 
+    def check_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            self.start_to_cut = True
+        if event.type == pygame.MOUSEBUTTONUP:
+            self.start_to_cut = False
+            self.spritecut.image = self.board
+            self.spritecut.mask = pygame.mask.from_surface(self.spritecut.image)
+            self.check_cut()
+        if self.start_to_cut and event.type == pygame.MOUSEMOTION:
+            pygame.draw.circle(self.board, (0, 0, 255), (event.pos[0] - self.x, event.pos[1] - self.y), 5)
+            self.spritecut.image = self.board
+
+    def draw_on_screen(self):
+        self.product.draw(screen)
+        if self.drawing:
+            self.lines.draw(screen)
+            self.already_cut.draw(screen)
+
 
 running = True
 rosemary = ProductToCut("rosemary.png", "rosemary_lines.png", "cut_rosemary.png", 300, 234, 50, 100)
@@ -92,20 +110,8 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            rosemary.start_to_cut = True
-        if event.type == pygame.MOUSEBUTTONUP:
-            rosemary.start_to_cut = False
-            rosemary.spritecut.image = rosemary.board
-            rosemary.spritecut.mask = pygame.mask.from_surface(rosemary.spritecut.image)
-            rosemary.check_cut()
-        if rosemary.start_to_cut and event.type == pygame.MOUSEMOTION:
-            pygame.draw.circle(rosemary.board, (0, 0, 255), (event.pos[0] - rosemary.x, event.pos[1] - rosemary.y), 5)
-            rosemary.spritecut.image = rosemary.board
-    rosemary.product.draw(screen)
-    if rosemary.drawing:
-        rosemary.lines.draw(screen)
-        rosemary.already_cut.draw(screen)
+        rosemary.check_event(event)
+    rosemary.draw_on_screen()
     pygame.display.flip()
     clock.tick(50)
 pygame.quit()

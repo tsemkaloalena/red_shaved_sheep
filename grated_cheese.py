@@ -70,15 +70,15 @@ class ProductToGrate(pygame.sprite.Sprite):
         if self.number_of_swipes == 0:
             self.end_of_game()
         elif self.number_of_swipes % 10 == 0:
-            self.ch_w -= 4
-            self.ch_h -= 4
+            self.ch_w -= 3
+            self.ch_h -= 3
             self.cheese.image = pygame.transform.scale(self.image, (self.ch_w, self.ch_h))
 
 
 running = True
 moving = False
 collision = []
-grate = ProductToGrate('grater.png', "cheese.png", 180, 180, 80, 120, (250, 250), 170, 120, 299, "grch.png",
+grate = ProductToGrate('grater.png', "cheese.png", 180, 180, 80, 120, (250, 250), 170, 120, 259, "grch.png",
                        (270, 270), (100, 100))
 
 while running:

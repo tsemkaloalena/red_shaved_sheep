@@ -37,7 +37,7 @@ grater.add(gratersprite)
 gratersprite.rect.x = 170
 gratersprite.rect.y = 120
 
-
+ch_w, ch_h = 180, 180
 image = load_image("cheese.png", -1)
 image = pygame.transform.scale(image, (180, 180))
 sprite = pygame.sprite.Sprite()
@@ -46,16 +46,34 @@ sprite.rect = sprite.image.get_rect()
 cheese.add(sprite)
 sprite.rect.x = 80
 sprite.rect.y = 120
+number_of_swipes = 100
+
+
+def end_of_game():
+    sprite.kill()
+    gratersprite.kill()
+    image_gr_ch = load_image("grch.png", -1)
+    image_gr_ch = pygame.transform.scale(image_gr_ch, (300, 300))
+    gr_ch = pygame.sprite.Sprite()
+    gr_ch.image = image_gr_ch
+    gr_ch.rect = sprite.image.get_rect()
+    cheese.add(gr_ch)
+    gr_ch.rect.x = 100
+    gr_ch.rect.y = 100
 
 
 def check_grate():
-    collision.append(pygame.sprite.spritecollideany(sprite, grater, collided=pygame.sprite.collide_rect_ratio(0.5)))
-    if len(collision) > 0:
+    global number_of_swipes
+    if pygame.sprite.spritecollideany(sprite, grater, collided=pygame.sprite.collide_rect_ratio(0.5)):
         number_of_swipes -= 1
-        print(pygame.sprite.spritecollideany(sprite, grater, collided=pygame.sprite.collide_rect_ratio(0.5)))
+    if number_of_swipes == 0:
+        end_of_game()
+    if number_of_swipes % 10 == 0:
+        sprite.image = pygame.transform.scale(image, (ch_w - 5, ch_h - 5))
+    print(number_of_swipes)
 
 
-number_of_swipes = 5
+
 running = True
 moving = False
 collision = []
@@ -70,11 +88,10 @@ while running:
         if event.type == pygame.MOUSEBUTTONUP:
             moving = False
         if event.type == pygame.MOUSEMOTION and moving:
+            check_grate()
             x, y = pygame.mouse.get_pos()
             sprite.rect.x = x - 50
             sprite.rect.y = y - 50
-        if number_of_swipes == 0:
-            running = False
     grater.draw(screen)
     cheese.draw(screen)
     pygame.display.flip()

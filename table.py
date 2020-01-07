@@ -433,3 +433,4 @@ while running:
             if not oven_stage(things_to_place[i]):
                 break
 pygame.quit()
+#чикибануба

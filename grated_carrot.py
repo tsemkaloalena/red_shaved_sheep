@@ -78,8 +78,8 @@ class ProductToGrate(pygame.sprite.Sprite):
 running = True
 moving = False
 collision = []
-grate = ProductToGrate('grater.png', "cheese.png", 180, 180, 80, 120, (250, 250), 170, 120, 299, "grch.png",
-                       (270, 270), (100, 100))
+grate = ProductToGrate('grater.png', "carrot.png", 250, 250, 80, 120, (250, 250), 170, 120, 199, "grcar.png",
+                       (270, 150), (120, 180))
 
 while running:
     screen.fill((0, 0, 0))

@@ -2,6 +2,16 @@ import pygame
 import os
 import random
 
+pygame.init()
+width, height = 500, 500
+size = width, height
+screen = pygame.display.set_mode(size)
+clock = pygame.time.Clock()
+screen_rect = (0, 0, width, height)
+all_sprites = pygame.sprite.Group()
+GRAVITY = 0.1
+pygame.display.set_caption("RSS kitchen")
+
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
@@ -20,6 +30,36 @@ def load_level(filename):
     with open(filename, 'r') as mapFile:
         level_map = [line.strip() for line in mapFile]
     return level_map[0], level_map[1::]
+
+
+class Particle(pygame.sprite.Sprite):
+    fire = [load_image("star.png", -1)]
+    for scale in (5, 10, 20):
+        fire.append(pygame.transform.scale(fire[0], (scale, scale)))
+
+    def __init__(self, pos, dx, dy):
+        super().__init__(all_sprites)
+        self.image = random.choice(self.fire)
+        self.rect = self.image.get_rect()
+
+        self.velocity = [dx, dy]
+        self.rect.x, self.rect.y = pos
+
+        self.gravity = GRAVITY
+
+    def update(self):
+        self.velocity[1] += self.gravity
+        self.rect.x += self.velocity[0]
+        self.rect.y += self.velocity[1]
+        if not self.rect.colliderect(screen_rect):
+            self.kill()
+
+
+def create_particles(position):
+    particle_count = 40
+    numbers = range(-5, 6)
+    for _ in range(particle_count):
+        Particle(position, random.choice(numbers), random.choice(numbers))
 
 
 class ProductToCut(pygame.sprite.Sprite):
@@ -67,7 +107,6 @@ class ProductToCut(pygame.sprite.Sprite):
         self.cut_product = cut_product
 
     def check_cut(self):
-        global time
         if pygame.sprite.collide_mask(self.spriteline, self.spritecut):
             m1 = self.spriteline.mask
             m2 = self.spritecut.mask
@@ -85,7 +124,6 @@ class ProductToCut(pygame.sprite.Sprite):
                 self.product.add(self.sprite)
                 self.name = 'cut_' + self.name
                 self.drawing = False
-                time = 500
                 return True
             return False
 
@@ -93,29 +131,12 @@ class ProductToCut(pygame.sprite.Sprite):
         pass
 
 
-pygame.init()
-width, height = 500, 500
-size = width, height
-screen = pygame.display.set_mode(size)
-clock = pygame.time.Clock()
-screen_rect = (0, 0, width, height)
-all_sprites = pygame.sprite.Group()
-time = 500
-pygame.display.set_caption("RSS kitchen")
-
 running = True
 font = pygame.font.SysFont('verdana', 20)
 string_rendered = font.render('', 1, (255, 255, 255))
 intro_rect = string_rendered.get_rect()
 intro_rect.x = 10
 intro_rect.y = 200
-
-fon = pygame.transform.scale(load_image('table.jpg'), [500, 500])
-
-timetext = font.render(str(time), 1, (255, 255, 255))
-time_rect = timetext.get_rect()
-time_rect.x = 470
-time_rect.y = 51
 
 stage, things_to_place = load_level('1.txt')  # стадия, на которой мы находимся, нужна будет при сборке всей игры
 startpos = 0
@@ -129,8 +150,19 @@ for i in things_to_place:
     startpos += int(st[2]) + 10
     everything.append(product)
 
+time = 300 * len(everything)
+fon = pygame.transform.scale(load_image('table.jpg'), [500, 500])
+
+timetext = font.render(str(time), 1, (255, 255, 255))
+time_rect = timetext.get_rect()
+time_rect.x = 470
+time_rect.y = 51
+
 temp_product = -1
+check_done = 0
 while running:
+    if check_done < 4:
+        check_done = 0
     screen.blit(fon, (0, 0))
     for event in pygame.event.get():
         if event.type == pygame.QUIT or time == 0:
@@ -183,14 +215,28 @@ while running:
     time_rect = timetext.get_rect()
     time_rect.x = 450
     time_rect.y = 5
-    time -= 1
     screen.blit(string_rendered, intro_rect)
     screen.blit(timetext, time_rect)
     for product in everything:
         product.product.draw(screen)
+        if 'cut' in product.name:
+            check_done += 1
         if product.drawing:
             product.lines.draw(screen)
             product.already_cut.draw(screen)
+    all_sprites.update()
+    all_sprites.draw(screen)
+    if check_done >= len(everything):
+        if check_done == len(everything):
+            create_particles((250, 0))
+        font = pygame.font.SysFont('verdana', 20)
+        string_rendered = font.render('Перейти к следующему шагу', 1, (255, 255, 255))
+        intro_rect = string_rendered.get_rect()
+        intro_rect.x = 5
+        intro_rect.y = 470
+        check_done = len(everything) + 1
+    if check_done < len(everything):
+        time -= 1
     pygame.display.flip()
     clock.tick(10)
 pygame.quit()

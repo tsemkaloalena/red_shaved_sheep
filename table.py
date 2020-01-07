@@ -29,7 +29,19 @@ def load_level(filename):
     filename = "data/levels/" + filename
     with open(filename, 'r') as mapFile:
         level_map = [line.strip() for line in mapFile]
-    return level_map[0], level_map[1::]
+    a = []
+    b = []
+    aFlag = True
+    for i in level_map:
+        if i == '-':
+            aFlag = True
+        elif aFlag:
+            aFlag = False
+            a.append(i)
+            b.append([])
+        else:
+            b[-1].append(i)
+    return a, b
 
 
 class Particle(pygame.sprite.Sprite):
@@ -133,6 +145,8 @@ class ProductToCut(pygame.sprite.Sprite):
 
 running = True
 stage, things_to_place = load_level('1.txt')
+print(stage, things_to_place)
+
 
 def cut_stage(things_to_place):
     global running
@@ -216,7 +230,7 @@ def cut_stage(things_to_place):
                                            5)
                         everything[temp_product].spritecut.image = everything[temp_product].board
 
-        timetext = font.render(str(time), 1, (255, 255, 255))
+        timetext = font.render(str(time).split('.')[0], 1, (255, 255, 255))
         time_rect = timetext.get_rect()
         time_rect.x = 450
         time_rect.y = 5
@@ -241,11 +255,19 @@ def cut_stage(things_to_place):
             intro_rect.y = 470
             check_done = len(everything) + 1
         if check_done < len(everything):
-            time -= 1
+            time -= 0.1
         pygame.display.flip()
-        clock.tick(10)
+        clock.tick(50)
+
+
+def oven_stage(things_to_place):
+    pass
+
 
 while running:
-    if stage == 'cut':
-        cut_stage(things_to_place)
+    for i in range(len(stage)):
+        if stage[i] == 'cut':
+            cut_stage(things_to_place[i])
+        if stage[i] == 'oven':
+            oven_stage(things_to_place[i])
 pygame.quit()

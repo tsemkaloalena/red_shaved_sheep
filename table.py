@@ -423,7 +423,9 @@ def oven_stage(things_to_place):
         pygame.display.flip()
         clock.tick(50)
 
-
+pygame.mixer.music.load('data/vitas.mp3')
+pygame.mixer.music.set_volume(0.4)
+pygame.mixer.music.play(loops=-1)
 while running:
     for i in range(len(stage)):
         if stage[i] == 'cut':

@@ -20,63 +20,67 @@ size = width, height
 screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
 
-all_sprites = pygame.sprite.Group()
 
-x, y = 50, 100
+class ProductToGrate(pygame.sprite.Sprite):
+    def __init__(self, grater, grated_product, product_size_x, product_size_y, product_x, product_y, grater_size,
+                 grater_x, grater_y, number_of_swipes, result, result_size, result_xy,  *group):
+        super().__init__(group)
+        self.grated = pygame.sprite.Group()
+        self.grater = pygame.sprite.Group()
 
-cheese = pygame.sprite.Group()
-grater = pygame.sprite.Group()
-help_line = pygame.sprite.Group()
+        self.gr = load_image(grater, -1)
+        self.gr = pygame.transform.scale(self.gr, grater_size)
+        self.gratersprite = pygame.sprite.Sprite()
+        self.gratersprite.image = self.gr
+        self.gratersprite.rect = self.gratersprite.image.get_rect()
+        self.grater.add(self.gratersprite)
+        self.gratersprite.rect.x = grater_x
+        self.gratersprite.rect.y = grater_y
 
-line = load_image('grater.png', -1)
-line = pygame.transform.scale(line, (250, 250))
-gratersprite = pygame.sprite.Sprite()
-gratersprite.image = line
-gratersprite.rect = gratersprite.image.get_rect()
-grater.add(gratersprite)
-gratersprite.rect.x = 170
-gratersprite.rect.y = 120
+        self.ch_w, self.ch_h = product_size_x, product_size_y
+        self.image = load_image(grated_product, -1)
+        self.image = pygame.transform.scale(self.image, (self.ch_w, self.ch_h))
+        self.cheese = pygame.sprite.Sprite()
+        self.cheese.image = self.image
+        self.cheese.rect = self.cheese.image.get_rect()
+        self.grated.add(self.cheese)
+        self.cheese.rect.x = product_x
+        self.cheese.rect.y = product_y
+        self.number_of_swipes = number_of_swipes
 
-ch_w, ch_h = 180, 180
-image = load_image("cheese.png", -1)
-image = pygame.transform.scale(image, (180, 180))
-sprite = pygame.sprite.Sprite()
-sprite.image = image
-sprite.rect = sprite.image.get_rect()
-cheese.add(sprite)
-sprite.rect.x = 80
-sprite.rect.y = 120
-number_of_swipes = 100
+        self.result = result
+        self.result_size = result_size
+        self.result_xy = result_xy
 
-
-def end_of_game():
-    sprite.kill()
-    gratersprite.kill()
-    image_gr_ch = load_image("grch.png", -1)
-    image_gr_ch = pygame.transform.scale(image_gr_ch, (300, 300))
-    gr_ch = pygame.sprite.Sprite()
-    gr_ch.image = image_gr_ch
-    gr_ch.rect = sprite.image.get_rect()
-    cheese.add(gr_ch)
-    gr_ch.rect.x = 100
-    gr_ch.rect.y = 100
+    def end_of_game(self):
+        self.cheese.kill()
+        self.gratersprite.kill()
+        self.image_gr_ch = load_image(self.result, -1)
+        self.image_gr_ch = pygame.transform.scale(self.image_gr_ch, self.result_size)
+        self.gr_ch = pygame.sprite.Sprite()
+        self.gr_ch.image = self.image_gr_ch
+        self.gr_ch.rect = self.gr_ch.image.get_rect()
+        self.grated.add(self.gr_ch)
+        self.gr_ch.rect.x = self.result_xy[0]
+        self.gr_ch.rect.y = self.result_xy[1]
 
 
-def check_grate():
-    global number_of_swipes
-    if pygame.sprite.spritecollideany(sprite, grater, collided=pygame.sprite.collide_rect_ratio(0.5)):
-        number_of_swipes -= 1
-    if number_of_swipes == 0:
-        end_of_game()
-    if number_of_swipes % 10 == 0:
-        sprite.image = pygame.transform.scale(image, (ch_w - 5, ch_h - 5))
-    print(number_of_swipes)
-
+    def check_grate(self):
+        if pygame.sprite.spritecollideany(self.cheese, self.grater, collided=pygame.sprite.collide_rect_ratio(0.5)):
+            self.number_of_swipes -= 1
+        if self.number_of_swipes == 0:
+            self.end_of_game()
+        elif self.number_of_swipes % 10 == 0:
+            self.ch_w -= 4
+            self.ch_h -= 4
+            self.cheese.image = pygame.transform.scale(self.image, (self.ch_w, self.ch_h))
 
 
 running = True
 moving = False
 collision = []
+grate = ProductToGrate('grater.png', "cheese.png", 180, 180, 80, 120, (250, 250), 170, 120, 299, "grch.png",
+                       (270, 270), (100, 100))
 
 while running:
     screen.fill((0, 0, 0))
@@ -88,12 +92,12 @@ while running:
         if event.type == pygame.MOUSEBUTTONUP:
             moving = False
         if event.type == pygame.MOUSEMOTION and moving:
-            check_grate()
+            grate.check_grate()
             x, y = pygame.mouse.get_pos()
-            sprite.rect.x = x - 50
-            sprite.rect.y = y - 50
-    grater.draw(screen)
-    cheese.draw(screen)
+            grate.cheese.rect.x = x - 50
+            grate.cheese.rect.y = y - 50
+    grate.grater.draw(screen)
+    grate.grated.draw(screen)
     pygame.display.flip()
     clock.tick(50)
 pygame.quit()

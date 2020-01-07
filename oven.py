@@ -111,7 +111,6 @@ class Oven(pygame.sprite.Sprite):
                 if self.slide:
                     self.sprite.rect.x = 170
                     self.sprite.rect.y = 170
-                print(self.ovenopen)
             elif not (oven.ovenon) and not (oven.ovenopen):
                 self.ovenon = True
                 self.ovensprite.image = pygame.transform.scale(self.workingoven, [500, 500])
@@ -139,7 +138,6 @@ class Oven(pygame.sprite.Sprite):
                 if self.slide:
                     self.sprite.rect.x = 170
                     self.sprite.rect.y = 170
-                    print(self.ovenopen)
                 if self.slide and '_done.png' in self.pr:
                     print('DONE!')
                     self.next_level()

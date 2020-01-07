@@ -143,6 +143,97 @@ class ProductToCut(pygame.sprite.Sprite):
         pass
 
 
+class Oven(pygame.sprite.Sprite):
+    def __init__(self, product):
+        super().__init__()
+        self.pr = product
+        self.level_done = 0
+        self.ovengroup = pygame.sprite.Group()
+        self.buttongroup = pygame.sprite.Group()
+        self.product = pygame.sprite.Group()
+
+        self.ovenon = False
+        self.ovenopen = False
+        self.slide = False
+
+        self.closedoven = load_image("closedoven.png", -1)
+        self.workingoven = load_image("workingoven.png", -1)
+        self.openoven = load_image("openoven.png", -1)
+
+        self.oven = pygame.transform.scale(self.closedoven, [500, 500])
+        self.ovensprite = pygame.sprite.Sprite()
+        self.ovensprite.image = self.oven
+        self.ovensprite.rect = self.ovensprite.image.get_rect()
+        self.ovengroup.add(self.ovensprite)
+        self.ovensprite.rect.x = 0
+        self.ovensprite.rect.y = 0
+
+        self.image = load_image(product, -1)
+        self.image = pygame.transform.scale(self.image, [150, 150])
+        self.sprite = pygame.sprite.Sprite()
+        self.sprite.image = self.image
+        self.sprite.mask = pygame.mask.from_surface(self.sprite.image)
+        self.sprite.rect = self.sprite.image.get_rect()
+        self.product.add(self.sprite)
+        self.sprite.rect.x = 170
+        self.sprite.rect.y = 350
+
+        self.buttonoff = load_image("off.png", -1)
+        self.buttonon = load_image("on.png", -1)
+        self.buttonoff = pygame.transform.scale(self.buttonoff, [20, 20])
+        self.buttonon = pygame.transform.scale(self.buttonon, [20, 20])
+        self.buttonsprite = pygame.sprite.Sprite()
+        self.buttonsprite.image = self.buttonoff
+        self.buttonsprite.rect = self.buttonsprite.image.get_rect()
+        self.buttongroup.add(self.buttonsprite)
+        self.buttonsprite.rect.x = 240
+        self.buttonsprite.rect.y = 60
+
+    def update(self, type):
+        if type == 1:
+            if self.ovenon and not (self.ovenopen):
+                self.ovenon = False
+                self.ovensprite.image = pygame.transform.scale(self.closedoven, [500, 500])
+                self.buttonsprite.image = self.buttonoff
+                if self.slide:
+                    self.sprite.rect.x = 170
+                    self.sprite.rect.y = 170
+            elif not (self.ovenon) and not (self.ovenopen):
+                self.ovenon = True
+                self.ovensprite.image = pygame.transform.scale(self.workingoven, [500, 500])
+                self.buttonsprite.image = self.buttonon
+                if self.slide:
+                    self.pr = self.pr[0:-4] + '_done.png'
+                    self.sprite.image = pygame.transform.scale(load_image(self.pr, -1),
+                                                               [150, 150])
+        if type == 2:
+            if not self.slide and self.ovenopen:
+                self.slide = True
+                self.sprite.rect.x = 170
+                self.sprite.rect.y = 170
+
+        else:
+            if self.ovenopen and not self.ovenon:
+                self.ovenopen = False
+                self.ovensprite.image = pygame.transform.scale(self.closedoven, [500, 500])
+                if self.slide:
+                    self.sprite.rect.x = -150
+                    self.sprite.rect.y = -150
+            elif not self.ovenopen and not self.ovenon:
+                self.ovenopen = True
+                self.ovensprite.image = pygame.transform.scale(self.openoven, [500, 500])
+                if self.slide:
+                    self.sprite.rect.x = 170
+                    self.sprite.rect.y = 170
+                if self.slide and '_done.png' in self.pr:
+                    print('DONE!')
+                    self.next_level()
+
+    def next_level(self):
+        self.level_done = 1
+        # Здесь будет извещение о завершении уровня, полученные баллы (от времени) и предложение перейти к дальнейшему оформлению блюда
+
+
 running = True
 stage, things_to_place = load_level('1.txt')
 print(stage, things_to_place)
@@ -186,7 +277,11 @@ def cut_stage(things_to_place):
             if event.type == pygame.QUIT:
                 cut_running = False
                 running = False
+                return False
             if event.type == pygame.MOUSEBUTTONDOWN:
+                if check_done >= 4:
+                    if intro_rect.collidepoint(event.pos):
+                        return True
                 if temp_product == -1:
                     for i in range(len(everything)):
                         if everything[i].sprite.rect.collidepoint(event.pos):
@@ -256,18 +351,85 @@ def cut_stage(things_to_place):
             check_done = len(everything) + 1
         if check_done < len(everything):
             time -= 0.1
+        if time == 0:
+            cut_running = False
+            running = False
+            return False
+            #переделать обработку проигрыша
         pygame.display.flip()
         clock.tick(50)
 
 
 def oven_stage(things_to_place):
-    pass
+    global running
+    oven = Oven(things_to_place[0].split()[0]+'.png')
+    oven_running = True
+    font = pygame.font.SysFont('verdana', 20)
+    string_rendered = font.render('', 1, (255, 255, 255))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.x = 10
+    intro_rect.y = 200
+    time = 150
+
+    timetext = font.render(str(time), 1, (255, 255, 255))
+    time_rect = timetext.get_rect()
+    time_rect.x = 470
+    time_rect.y = 5
+    while oven_running:
+        screen.fill((0, 0, 0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                oven_running = False
+                running = False
+                return False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if oven.level_done >= 1:
+                    if intro_rect.collidepoint(event.pos):
+                        return True
+                if oven.sprite.rect.collidepoint(event.pos):
+                    oven.update(2)
+                elif oven.buttonsprite.rect.collidepoint(event.pos):
+                    oven.update(1)
+                elif oven.ovensprite.rect.collidepoint(event.pos):
+                    oven.update(0)
+        if oven.level_done == 1:
+            create_particles((250, 0))
+            font = pygame.font.SysFont('verdana', 20)
+            string_rendered = font.render('Перейти к следующему шагу', 1, (255, 255, 255))
+            intro_rect = string_rendered.get_rect()
+            intro_rect.x = 5
+            intro_rect.y = 470
+            oven.level_done = 2
+        timetext = font.render(str(time), 1, (255, 255, 255))
+        time_rect = timetext.get_rect()
+        time_rect.x = 470
+        time_rect.y = 5
+        if oven.level_done == 0:
+            time -= 0.1
+        if time == 0:
+            print('Вы проиграли!')
+            oven_running = False
+            running = False
+            return False
+            #переделать обработку проигрыша
+        all_sprites.update()
+        screen.fill((0, 0, 0))
+        oven.ovengroup.draw(screen)
+        oven.buttongroup.draw(screen)
+        oven.product.draw(screen)
+        all_sprites.draw(screen)
+        screen.blit(string_rendered, intro_rect)
+        screen.blit(timetext, time_rect)
+        pygame.display.flip()
+        clock.tick(50)
 
 
 while running:
     for i in range(len(stage)):
         if stage[i] == 'cut':
-            cut_stage(things_to_place[i])
+            if not cut_stage(things_to_place[i]):
+                break
         if stage[i] == 'oven':
-            oven_stage(things_to_place[i])
+            if not oven_stage(things_to_place[i]):
+                break
 pygame.quit()

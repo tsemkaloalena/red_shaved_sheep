@@ -10,7 +10,7 @@ clock = pygame.time.Clock()
 screen_rect = (0, 0, width, height)
 all_sprites = pygame.sprite.Group()
 GRAVITY = 0.1
-pygame.display.set_caption("RSS kitchen")
+pygame.display.set_caption("SSB kitchen")
 
 
 def load_image(name, colorkey=None):
@@ -355,14 +355,14 @@ def cut_stage(things_to_place):
             cut_running = False
             running = False
             return False
-            #переделать обработку проигрыша
+            # переделать обработку проигрыша
         pygame.display.flip()
         clock.tick(50)
 
 
 def oven_stage(things_to_place):
     global running
-    oven = Oven(things_to_place[0].split()[0]+'.png')
+    oven = Oven(things_to_place[0].split()[0] + '.png')
     oven_running = True
     font = pygame.font.SysFont('verdana', 20)
     string_rendered = font.render('', 1, (255, 255, 255))
@@ -411,7 +411,7 @@ def oven_stage(things_to_place):
             oven_running = False
             running = False
             return False
-            #переделать обработку проигрыша
+            # переделать обработку проигрыша
         all_sprites.update()
         screen.fill((0, 0, 0))
         oven.ovengroup.draw(screen)
@@ -423,16 +423,108 @@ def oven_stage(things_to_place):
         pygame.display.flip()
         clock.tick(50)
 
+
+def start_screen():
+    global running, start_running, rules_running, menu_running
+    fon = pygame.transform.scale(load_image('main_wall.png'), (500, 500))
+
+    buttongroup = pygame.sprite.Group()
+
+    rules_button = load_image('rules.png', -1)
+    rules_button = pygame.transform.scale(rules_button, [150, 70])
+    rulesbuttonsprite = pygame.sprite.Sprite()
+    rulesbuttonsprite.image = rules_button
+    rulesbuttonsprite.rect = rulesbuttonsprite.image.get_rect()
+    buttongroup.add(rulesbuttonsprite)
+    rulesbuttonsprite.rect.x = 10
+    rulesbuttonsprite.rect.y = 300
+
+    menu_button = load_image('menu.png', -1)
+    menu_button = pygame.transform.scale(menu_button, [120, 60])
+    menubuttonsprite = pygame.sprite.Sprite()
+    menubuttonsprite.image = menu_button
+    menubuttonsprite.rect = menubuttonsprite.image.get_rect()
+    buttongroup.add(menubuttonsprite)
+    menubuttonsprite.rect.x = 10
+    menubuttonsprite.rect.y = 370
+
+    start_running = True
+    while start_running:
+        screen.blit(fon, (0, 0))
+        buttongroup.draw(screen)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                start_running = False
+                running = False
+                return False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if rulesbuttonsprite.rect.collidepoint(event.pos):
+                    start_running = False
+                    rules_running = True
+                    return False
+                elif menubuttonsprite.rect.collidepoint(event.pos):
+                    start_running = False
+                    menu_running = True
+                    return False
+        pygame.display.flip()
+        clock.tick(50)
+    return True
+
+def rules():
+    global running, start_running, rules_running
+
+    fon = pygame.transform.scale(load_image('rules.jpg'), (500, 500))
+    screen.blit(fon, (0, 0))
+
+    buttongroup = pygame.sprite.Group()
+
+    main_button = load_image('main.png', -1)
+    main_button = pygame.transform.scale(main_button, [150, 50])
+    mainbuttonsprite = pygame.sprite.Sprite()
+    mainbuttonsprite.image = main_button
+    mainbuttonsprite.rect = mainbuttonsprite.image.get_rect()
+    buttongroup.add(mainbuttonsprite)
+    mainbuttonsprite.rect.x = 10
+    mainbuttonsprite.rect.y = 450
+    buttongroup.draw(screen)
+
+    while rules_running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                rules_running = False
+                running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if mainbuttonsprite.rect.collidepoint(event.pos):
+                    start_running = True
+                    rules_running = False
+                    return False
+        pygame.display.flip()
+        clock.tick(50)
+
 pygame.mixer.music.load('data/vitas.mp3')
 pygame.mixer.music.set_volume(0.4)
 pygame.mixer.music.play(loops=-1)
+start_running = True
+rules_running = False
+menu_running = False
+game_running = False
+level_number = -1
+
 while running:
-    for i in range(len(stage)):
-        if stage[i] == 'cut':
-            if not cut_stage(things_to_place[i]):
-                break
-        if stage[i] == 'oven':
-            if not oven_stage(things_to_place[i]):
-                break
+    if start_running:
+        start_screen()
+        continue
+    if rules_running:
+        rules()
+        continue
+    if menu_running:
+        break
+    if game_running:
+        for i in range(len(stage)):
+            if stage[i] == 'cut':
+                if not cut_stage(things_to_place[i]):
+                    break
+            if stage[i] == 'oven':
+                if not oven_stage(things_to_place[i]):
+                    break
 pygame.quit()
-#чикибануба

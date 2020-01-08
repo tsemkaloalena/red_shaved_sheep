@@ -5,26 +5,6 @@ from PIL import Image
 import csv
 
 
-def info_from_csv(fname):
-    with open(fname, encoding="utf8") as csvfile:
-        reader = csv.reader(csvfile, delimiter=';', quotechar='"')
-        pictures = list(map(lambda x: ''.join(x) + '.png', reader))[1:]
-        blocked = list(filter(lambda x: x[0] == '1', pictures))
-        blocked = list(map(lambda x: int(x[1:3]), blocked))
-        return pictures, len(pictures), blocked
-
-
-def merge_images(pictures):
-    images = []
-    for file in pictures:
-        image = Image.open(os.path.join('data', file))
-        images.append(image)
-    width, height = images[0].size
-    result_height = height * len(images)
-    result = Image.new('RGBA', (width, result_height))
-    for image in enumerate(images):
-        result.paste(image[1], (0, height * image[0]), image[1].convert('RGBA'))
-    result.save(os.path.join('data', 'menu_levels.png'), "PNG")
 
 
 pygame.init()
@@ -67,6 +47,28 @@ def load_level(filename):
         else:
             b[-1].append(i)
     return a, b
+
+
+def info_from_csv(fname):
+    with open(fname, encoding="utf8") as csvfile:
+        reader = csv.reader(csvfile, delimiter=';', quotechar='"')
+        pictures = list(map(lambda x: ''.join(x) + '.png', reader))[1:]
+        blocked = list(filter(lambda x: x[0] == '1', pictures))
+        blocked = list(map(lambda x: int(x[1:3]), blocked))
+        return pictures, len(pictures), blocked
+
+
+def merge_images(pictures):
+    images = []
+    for file in pictures:
+        image = Image.open(os.path.join('data', file))
+        images.append(image)
+    width, height = images[0].size
+    result_height = height * len(images)
+    result = Image.new('RGBA', (width, result_height))
+    for image in enumerate(images):
+        result.paste(image[1], (0, height * image[0]), image[1].convert('RGBA'))
+    result.save(os.path.join('data', 'menu_levels.png'), "PNG")
 
 
 class Particle(pygame.sprite.Sprite):
@@ -534,7 +536,7 @@ def menu():
     menu, dish_amount, blocked = info_from_csv(os.path.join('data', fname))
     merge_images(menu)
 
-    image = pygame.image.load(os.path.join('data', 'menu.png'))
+    image = pygame.image.load(os.path.join('data', 'menupage.png'))
     level_pic = pygame.image.load(os.path.join('data', 'menu_levels.png')).convert_alpha()
     top = pygame.image.load(os.path.join('data', 'menutop.png'))
     bottom = pygame.image.load(os.path.join('data', 'menubot.png'))

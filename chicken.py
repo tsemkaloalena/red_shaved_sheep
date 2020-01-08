@@ -43,6 +43,7 @@ class Stuffing(pygame.sprite.Sprite):
 class ProductToStuff(pygame.sprite.Sprite):
     def __init__(self, product, product_min_w, product_min_h, product_max_w, product_max_h, product_x, product_y, *group):
         super().__init__(group)
+        self.sprite_group = pygame.sprite.Group()
         self.stuffings = pygame.sprite.Group()
         self.list = []
         self.product_max_w = product_max_w
@@ -56,24 +57,25 @@ class ProductToStuff(pygame.sprite.Sprite):
         self.product.rect = self.product.image.get_rect()
         self.product.rect.x = product_x
         self.product.rect.y = product_y
+        self.sprite_group.add(self.product)
 
     def add_stuff(self, stuffing):
+        product_x = self.product.rect.x
+        product_y = self.product.rect.y
         k = len(self.stuffings.sprites())
-        self.stuffings.remove(stuffing)
+        self.stuffings.remove(stuffing.sprite)
+        self.list.remove(stuffing)
         dx = (self.product_max_w - self.product_size[0]) // k
         dy = (self.product_max_h - self.product_size[1]) // k
-        self.product_size[0] += dx
-        self.product_size[1] += dy
+        self.product_size = self.product_size[0] + dx, self.product_size[1] + dy
+        self.sprite_group.remove(self.product)
+        self.product = pygame.sprite.Sprite()
         self.product.image = pygame.transform.scale(self.product_image, self.product_size)
-
-    # def check_oil(self):
-    #     if pygame.sprite.collide_mask(self.sprite, self.oiled):
-    #         m1 = self.sprite.mask
-    #         m2 = self.oiled.mask
-    #         m = m1.overlap_mask(m2, (0, 0))
-
-    #         self.sprite.mask = pygame.mask.from_surface(self.sprite.image)
-
+        self.product.mask = pygame.mask.from_surface(self.product.image)
+        self.product.rect = self.product.image.get_rect()
+        self.product.rect.x = product_x
+        self.product.rect.y = product_y
+        self.sprite_group.add(self.product)
 
     # def draw_on_screen(self):
     #     self.product.draw(screen)
@@ -87,26 +89,6 @@ class ProductToStuff(pygame.sprite.Sprite):
 
     def check_event(self, event):
         pass
-    #     if event.type == pygame.MOUSEBUTTONDOWN:
-    #         if self.oiling:
-    #             self.start_to_oil = True
-    #     if event.type == pygame.MOUSEBUTTONUP:
-    #         self.start_to_oil = False
-    #         self.oiled.image = self.board
-    #         self.oiled.mask = pygame.mask.from_surface(self.oiled.image)
-    #         self.check_oil()
-    #     if self.start_to_oil and event.type == pygame.MOUSEMOTION:
-    #         pygame.draw.circle(self.board, (255, 255, 0), (event.pos[0] - self.x, event.pos[1] - self.y), 15)
-    #         self.oiled.image = self.board
-    #     if event.type == pygame.MOUSEMOTION:
-    #         self.change_cursor()
-    #     if event.type == pygame.MOUSEBUTTONDOWN and self.bowl.rect.collidepoint(event.pos):
-    #         if self.oiling:
-    #             self.oiling = False
-    #             self.change_bowl()
-    #         else:
-    #             self.oiling = True
-    #             self.change_bowl()
 
 
 running = True
@@ -137,9 +119,14 @@ while running:
                 if prod.move:
                     prod.sprite.rect.x = event.pos[0] + prod.dx
                     prod.sprite.rect.y = event.pos[1] + prod.dy
+                    if pygame.sprite.collide_mask(prod.sprite, chicken.product):
+                        print(1)
+                        chicken.add_stuff(prod)
 
     chicken.stuffings.draw(screen)
     chicken.stuffings.update()
+    chicken.sprite_group.draw(screen)
+    chicken.sprite_group.update()
 
     pygame.display.flip()
     clock.tick(50)

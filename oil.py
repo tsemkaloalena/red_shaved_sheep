@@ -151,7 +151,7 @@ class ProductToOil(pygame.sprite.Sprite):
 
 
 running = True
-oil = ProductToOil("orange.png", "oiled_orange.png", 300, 189, 50, 100, 100, 300, 300)
+oil = ProductToOil("raw_chicken.png", "oiled_raw_chicken.png", 200, 200, 50, 100, 100, 300, 300)
 
 while running:
     screen.fill((0, 0, 0))

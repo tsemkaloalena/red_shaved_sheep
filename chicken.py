@@ -77,22 +77,41 @@ class ProductToStuff(pygame.sprite.Sprite):
         self.product.rect.y = product_y
         self.sprite_group.add(self.product)
 
-    # def draw_on_screen(self):
-    #     self.product.draw(screen)
-    #     if self.drawing:
-    #         self.already_oil.draw(screen)
-    #     self.bowls.update()
-    #     self.bowls.draw(screen)
-    #     if pygame.mouse.get_focused() and self.oiling:
-    #         self.brush.draw(screen)
-    #     self.brush.update()
+    def draw_on_screen(self):
+        self.stuffings.draw(screen)
+        self.stuffings.update()
+        self.sprite_group.draw(screen)
+        self.sprite_group.update()
 
     def check_event(self, event):
-        pass
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            for i in range(len(self.list)):
+                prod = self.list[i]
+                if prod.sprite.rect.x <= event.pos[
+                    0] <= prod.sprite.rect.x + prod.sprite.rect.w and prod.sprite.rect.y <= event.pos[
+                    1] <= prod.sprite.rect.y + prod.sprite.rect.h:
+                    prod.move = True
+                    prod.dx = prod.sprite.rect.x - event.pos[0]
+                    prod.dy = prod.sprite.rect.y - event.pos[1]
+        if event.type == pygame.MOUSEBUTTONUP:
+            for i in range(len(self.list)):
+                prod = self.list[i]
+                if prod.sprite.rect.x <= event.pos[
+                    0] <= prod.sprite.rect.x + prod.sprite.rect.w and prod.sprite.rect.y <= event.pos[
+                    1] <= prod.sprite.rect.y + prod.sprite.rect.h:
+                    prod.move = False
+        if event.type == pygame.MOUSEMOTION:
+            for i in range(len(self.list)):
+                prod = self.list[i]
+                if prod.move:
+                    prod.sprite.rect.x = event.pos[0] + prod.dx
+                    prod.sprite.rect.y = event.pos[1] + prod.dy
+                    if pygame.sprite.collide_mask(prod.sprite, self.product):
+                        self.add_stuff(prod)
 
 
 running = True
-chicken = ProductToStuff("raw_chicken.png", 50, 50, 300, 300, 10, 10)
+chicken = ProductToStuff("raw_chicken.png", 50, 50, 250, 250, 10, 10)
 carrot = Stuffing("cut_orange.png", 50, 50, 400, 400, chicken)
 apple = Stuffing("cut_apple.png", 50, 50, 300, 300, chicken)
 
@@ -101,33 +120,8 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            for i in range(len(chicken.list)):
-                prod = chicken.list[i]
-                if prod.sprite.rect.x <= event.pos[0] <= prod.sprite.rect.x + prod.sprite.rect.w and prod.sprite.rect.y <= event.pos[1] <= prod.sprite.rect.y + prod.sprite.rect.h:
-                    prod.move = True
-                    prod.dx = prod.sprite.rect.x - event.pos[0]
-                    prod.dy = prod.sprite.rect.y - event.pos[1]
-        if event.type == pygame.MOUSEBUTTONUP:
-            for i in range(len(chicken.list)):
-                prod = chicken.list[i]
-                if prod.sprite.rect.x <= event.pos[0] <= prod.sprite.rect.x + prod.sprite.rect.w and prod.sprite.rect.y <= event.pos[1] <= prod.sprite.rect.y + prod.sprite.rect.h:
-                    prod.move = False
-        if event.type == pygame.MOUSEMOTION:
-            for i in range(len(chicken.list)):
-                prod = chicken.list[i]
-                if prod.move:
-                    prod.sprite.rect.x = event.pos[0] + prod.dx
-                    prod.sprite.rect.y = event.pos[1] + prod.dy
-                    if pygame.sprite.collide_mask(prod.sprite, chicken.product):
-                        print(1)
-                        chicken.add_stuff(prod)
-
-    chicken.stuffings.draw(screen)
-    chicken.stuffings.update()
-    chicken.sprite_group.draw(screen)
-    chicken.sprite_group.update()
-
+        chicken.check_event(event)
+    chicken.draw_on_screen()
     pygame.display.flip()
     clock.tick(50)
 pygame.quit()

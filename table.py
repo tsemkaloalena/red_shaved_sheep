@@ -269,7 +269,13 @@ def cut_stage(things_to_place):
     intro_rect = string_rendered.get_rect()
     intro_rect.x = 10
     intro_rect.y = 200
-    startpos = 0
+
+    recepy = font.render('Нарежь продукты', 1, (255, 0, 0))
+    recepy_rect = recepy.get_rect()
+    recepy_rect.x = 10
+    recepy_rect.y = 5
+
+    startpos = 30
     everything = []
     positions = []
     for i in things_to_place:
@@ -353,6 +359,7 @@ def cut_stage(things_to_place):
         time_rect.y = 5
         screen.blit(string_rendered, intro_rect)
         screen.blit(timetext, time_rect)
+        screen.blit(recepy, recepy_rect)
         for product in everything:
             product.product.draw(screen)
             if 'cut' in product.name:
@@ -383,7 +390,7 @@ def cut_stage(things_to_place):
 
 
 def oven_stage(things_to_place):
-    global running
+    global running, start_running, game_running
     oven = Oven(things_to_place[0].split()[0] + '.png')
     oven_running = True
     font = pygame.font.SysFont('verdana', 20)
@@ -391,7 +398,12 @@ def oven_stage(things_to_place):
     intro_rect = string_rendered.get_rect()
     intro_rect.x = 10
     intro_rect.y = 200
-    time = 150
+    time = 100
+
+    recepy = font.render('Приготовь блюдо в духовке', 1, (255, 0, 0))
+    recepy_rect = recepy.get_rect()
+    recepy_rect.x = 10
+    recepy_rect.y = 5
 
     timetext = font.render(str(time), 1, (255, 255, 255))
     time_rect = timetext.get_rect()
@@ -422,18 +434,18 @@ def oven_stage(things_to_place):
             intro_rect.x = 5
             intro_rect.y = 470
             oven.level_done = 2
-        timetext = font.render(str(time), 1, (255, 255, 255))
+        timetext = font.render(str(time).split('.')[0], 1, (255, 255, 255))
         time_rect = timetext.get_rect()
-        time_rect.x = 470
+        time_rect.x = 460
         time_rect.y = 5
         if oven.level_done == 0:
             time -= 0.1
-        if time == 0:
-            print('Вы проиграли!')
+        if time <= 0:
             oven_running = False
-            running = False
+            start_running = True
+            game_running = False
+            lose()
             return False
-            # переделать обработку проигрыша
         all_sprites.update()
         screen.fill((0, 0, 0))
         oven.ovengroup.draw(screen)
@@ -442,6 +454,7 @@ def oven_stage(things_to_place):
         all_sprites.draw(screen)
         screen.blit(string_rendered, intro_rect)
         screen.blit(timetext, time_rect)
+        screen.blit(recepy, recepy_rect)
         pygame.display.flip()
         clock.tick(50)
 
@@ -590,7 +603,7 @@ def ending():
     global running, start_running, namelevel
 
     fon = pygame.transform.scale(load_image('win.jpg'), (500, 500))
-    dish = pygame.transform.scale(load_image(str(namelevel)+'result.png', -1), (250, 250))
+    dish = pygame.transform.scale(load_image(str(namelevel) + 'result.png', -1), (250, 250))
 
     screen.blit(fon, (0, 0))
     screen.blit(dish, (110, 100))
@@ -599,6 +612,47 @@ def ending():
 
     end_running = True
 
+    main_button = load_image('main.png', -1)
+    main_button = pygame.transform.scale(main_button, [150, 50])
+    mainbuttonsprite = pygame.sprite.Sprite()
+    mainbuttonsprite.image = main_button
+    mainbuttonsprite.rect = mainbuttonsprite.image.get_rect()
+    buttongroup.add(mainbuttonsprite)
+    mainbuttonsprite.rect.x = 10
+    mainbuttonsprite.rect.y = 450
+    buttongroup.draw(screen)
+
+    while end_running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                end_running = False
+                running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if mainbuttonsprite.rect.collidepoint(event.pos):
+                    pygame.mixer.music.load('data/rhapsody.mp3')
+                    pygame.mixer.music.set_volume(0.4)
+                    pygame.mixer.music.play(loops=-1)
+                    namelevel = ''
+                    start_running = True
+                    end_running = False
+                    return False
+        pygame.display.flip()
+        clock.tick(50)
+
+
+def lose():
+    global running, start_running, namelevel
+
+    fon = pygame.transform.scale(load_image('lose.jpg'), (500, 500))
+    screen.blit(fon, (0, 0))
+
+    pygame.mixer.music.load('data/directedby.mp3')
+    pygame.mixer.music.set_volume(0.4)
+    pygame.mixer.music.play(loops=-1)
+
+    buttongroup = pygame.sprite.Group()
+
+    end_running = True
 
     main_button = load_image('main.png', -1)
     main_button = pygame.transform.scale(main_button, [150, 50])

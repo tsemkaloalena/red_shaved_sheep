@@ -258,6 +258,97 @@ class Oven(pygame.sprite.Sprite):
         # Здесь будет извещение о завершении уровня, полученные баллы (от времени) и предложение перейти к дальнейшему оформлению блюда
 
 
+class Stuffing(pygame.sprite.Sprite):
+    def __init__(self, product, product_w, product_h, product_x, product_y, group, *k):
+        super().__init__(k)
+        self.move = False
+        self.dx = 0
+        self.dy = 0
+        self.img_size = product_w, product_h
+        self.image = load_image(product, -1)
+        self.image = pygame.transform.scale(self.image, self.img_size)
+        self.sprite = pygame.sprite.Sprite()
+        self.sprite.image = self.image
+        self.sprite.mask = pygame.mask.from_surface(self.sprite.image)
+        self.sprite.rect = self.sprite.image.get_rect()
+        self.sprite.rect.x = product_x
+        self.sprite.rect.y = product_y
+        group.stuffings.add(self.sprite)
+        group.list.append(self)
+
+
+class ProductToStuff(pygame.sprite.Sprite):
+    def __init__(self, product, product_min_w, product_min_h, product_max_w, product_max_h, product_x, product_y,
+                 *group):
+        super().__init__(group)
+        self.sprite_group = pygame.sprite.Group()
+        self.stuffings = pygame.sprite.Group()
+        self.list = []
+        self.product_max_w = product_max_w
+        self.product_max_h = product_max_h
+
+        self.product_image = load_image(product, -1)
+        self.product_size = product_min_w, product_min_h
+        self.product = pygame.sprite.Sprite()
+        self.product.image = pygame.transform.scale(self.product_image, self.product_size)
+        self.product.mask = pygame.mask.from_surface(self.product.image)
+        self.product.rect = self.product.image.get_rect()
+        self.product.rect.x = product_x
+        self.product.rect.y = product_y
+        self.sprite_group.add(self.product)
+
+    def add_stuff(self, stuffing):
+        product_x = self.product.rect.x
+        product_y = self.product.rect.y
+        k = len(self.stuffings.sprites())
+        self.stuffings.remove(stuffing.sprite)
+        self.list.remove(stuffing)
+        dx = (self.product_max_w - self.product_size[0]) // k
+        dy = (self.product_max_h - self.product_size[1]) // k
+        self.product_size = self.product_size[0] + dx, self.product_size[1] + dy
+        self.sprite_group.remove(self.product)
+        self.product = pygame.sprite.Sprite()
+        self.product.image = pygame.transform.scale(self.product_image, self.product_size)
+        self.product.mask = pygame.mask.from_surface(self.product.image)
+        self.product.rect = self.product.image.get_rect()
+        self.product.rect.x = product_x
+        self.product.rect.y = product_y
+        self.sprite_group.add(self.product)
+
+    def draw_on_screen(self):
+        self.stuffings.draw(screen)
+        self.stuffings.update()
+        self.sprite_group.draw(screen)
+        self.sprite_group.update()
+
+    def check_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            for i in range(len(self.list)):
+                prod = self.list[i]
+                if prod.sprite.rect.x <= event.pos[
+                    0] <= prod.sprite.rect.x + prod.sprite.rect.w and prod.sprite.rect.y <= event.pos[
+                    1] <= prod.sprite.rect.y + prod.sprite.rect.h:
+                    prod.move = True
+                    prod.dx = prod.sprite.rect.x - event.pos[0]
+                    prod.dy = prod.sprite.rect.y - event.pos[1]
+        if event.type == pygame.MOUSEBUTTONUP:
+            for i in range(len(self.list)):
+                prod = self.list[i]
+                if prod.sprite.rect.x <= event.pos[
+                    0] <= prod.sprite.rect.x + prod.sprite.rect.w and prod.sprite.rect.y <= event.pos[
+                    1] <= prod.sprite.rect.y + prod.sprite.rect.h:
+                    prod.move = False
+        if event.type == pygame.MOUSEMOTION:
+            for i in range(len(self.list)):
+                print(self.list)
+                prod = self.list[i]
+                if prod.move:
+                    prod.sprite.rect.x = event.pos[0] + prod.dx
+                    prod.sprite.rect.y = event.pos[1] + prod.dy
+                    if pygame.sprite.collide_mask(prod.sprite, self.product):
+                        self.add_stuff(prod)
+
+
 running = True
 
 
@@ -465,6 +556,70 @@ def oven_stage(things_to_place):
         clock.tick(50)
 
 
+def stuffing_stage(things_to_place):
+    global running, start_running, game_running, maxscore, score, stuff_running
+    stuff_running = True
+
+    tostuff = things_to_place[0]
+    stuffs = things_to_place[1::]
+
+    chicken = ProductToStuff(tostuff.split()[0] + ".png", 100, 100, 200, 200, 230, 200)
+
+    font = pygame.font.SysFont('verdana', 20)
+    string_rendered = font.render('', 1, (255, 255, 255))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.x = 10
+    intro_rect.y = 200
+
+    recepy = font.render('Нафаршируй своё блюдо', 1, (255, 0, 0))
+    recepy_rect = recepy.get_rect()
+    recepy_rect.x = 10
+    recepy_rect.y = 5
+
+    startpos = 30
+    everything = []
+
+    for i in stuffs:
+        st = i.split()
+        product = Stuffing(st[0] + '.png', int(st[1]), int(st[2]), 0, startpos, chicken)
+        startpos += int(st[2]) + 10
+        everything.append(product)
+
+    time = 100 * len(everything)
+    maxscore += time
+    fon = pygame.transform.scale(load_image('table.jpg'), [500, 500])
+
+    timetext = font.render(str(time), 1, (255, 255, 255))
+    time_rect = timetext.get_rect()
+    time_rect.x = 470
+    time_rect.y = 51
+
+    while running:
+        screen.fill((0, 0, 0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            chicken.check_event(event)
+
+        timetext = font.render(str(time).split('.')[0], 1, (255, 255, 255))
+        time_rect = timetext.get_rect()
+        time_rect.x = 460
+        time_rect.y = 5
+        time -= 0.1
+        if time <= 0:
+            stuff_running = False
+            start_running = True
+            game_running = False
+            lose()
+            return False
+        screen.blit(string_rendered, intro_rect)
+        screen.blit(timetext, time_rect)
+        screen.blit(recepy, recepy_rect)
+        chicken.draw_on_screen()
+        pygame.display.flip()
+        clock.tick(50)
+
+
 def start_screen():
     global running, start_running, rules_running, menu_running
     fon = pygame.transform.scale(load_image('main_wall.png'), (500, 500))
@@ -615,12 +770,13 @@ def ending():
     screen.blit(dish, (110, 100))
 
     font = pygame.font.SysFont('verdana', 20)
-    string_rendered = font.render('Cчёт: {}/{}'.format(str(score).split('.')[0], str(maxscore).split('.')[0]), 1, (255, 255, 255))
+    string_rendered = font.render('Cчёт: {}/{}'.format(str(score).split('.')[0], str(maxscore).split('.')[0]), 1,
+                                  (255, 255, 255))
     intro_rect = string_rendered.get_rect()
     intro_rect.x = 170
     intro_rect.y = 100
 
-    res_score = score/maxscore
+    res_score = score / maxscore
     if res_score >= 0.75:
         pass
     elif res_score > 0.5 and res_score < 0.75:
@@ -711,6 +867,7 @@ start_running = True
 rules_running = False
 menu_running = False
 game_running = False
+stuff_running = False
 level_number = -1
 namelevel = ''
 
@@ -740,6 +897,9 @@ while running:
                     break
             if stage[i] == 'oven':
                 if not oven_stage(things_to_place[i]):
+                    break
+            if stage[i] == 'stuff':
+                if not stuffing_stage(things_to_place[i]):
                     break
             if stage[i] == 'end':
                 game_running = False

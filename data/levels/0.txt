@@ -4,6 +4,13 @@ apple 150 120
 orange 200 130
 rosemary 200 117
 -
+stuff
+turkey 100 100
+cut_orange 200 130
+cut_apple 150 120
+cut_carrot 240 63
+cut_rosemary 200 117
+-
 oven
 turkey 200 200
 -

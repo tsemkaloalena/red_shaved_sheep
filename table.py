@@ -262,7 +262,7 @@ running = True
 
 
 def cut_stage(things_to_place):
-    global running
+    global running, maxscore, score, game_running, start_running
     cut_running = True
     font = pygame.font.SysFont('verdana', 20)
     string_rendered = font.render('', 1, (255, 255, 255))
@@ -287,6 +287,7 @@ def cut_stage(things_to_place):
         everything.append(product)
 
     time = 300 * len(everything)
+    maxscore += time
     fon = pygame.transform.scale(load_image('table.jpg'), [500, 500])
 
     timetext = font.render(str(time), 1, (255, 255, 255))
@@ -372,6 +373,7 @@ def cut_stage(things_to_place):
         if check_done >= len(everything):
             if check_done == len(everything):
                 create_particles((250, 0))
+                score += time
             font = pygame.font.SysFont('verdana', 20)
             string_rendered = font.render('Перейти к следующему шагу', 1, (255, 255, 255))
             intro_rect = string_rendered.get_rect()
@@ -380,9 +382,11 @@ def cut_stage(things_to_place):
             check_done = len(everything) + 1
         if check_done < len(everything):
             time -= 0.1
-        if time == 0:
+        if time <= 0:
             cut_running = False
-            running = False
+            start_running = True
+            game_running = False
+            lose()
             return False
             # переделать обработку проигрыша
         pygame.display.flip()
@@ -390,7 +394,7 @@ def cut_stage(things_to_place):
 
 
 def oven_stage(things_to_place):
-    global running, start_running, game_running
+    global running, start_running, game_running, maxscore, score
     oven = Oven(things_to_place[0].split()[0] + '.png')
     oven_running = True
     font = pygame.font.SysFont('verdana', 20)
@@ -399,6 +403,7 @@ def oven_stage(things_to_place):
     intro_rect.x = 10
     intro_rect.y = 200
     time = 100
+    maxscore += time
 
     recepy = font.render('Приготовь блюдо в духовке', 1, (255, 0, 0))
     recepy_rect = recepy.get_rect()
@@ -431,6 +436,7 @@ def oven_stage(things_to_place):
             font = pygame.font.SysFont('verdana', 20)
             string_rendered = font.render('Перейти к следующему шагу', 1, (255, 255, 255))
             intro_rect = string_rendered.get_rect()
+            score += time
             intro_rect.x = 5
             intro_rect.y = 470
             oven.level_done = 2
@@ -600,13 +606,29 @@ def menu():
 
 
 def ending():
-    global running, start_running, namelevel
+    global running, start_running, namelevel, maxscore, score
 
     fon = pygame.transform.scale(load_image('win.jpg'), (500, 500))
     dish = pygame.transform.scale(load_image(str(namelevel) + 'result.png', -1), (250, 250))
 
     screen.blit(fon, (0, 0))
     screen.blit(dish, (110, 100))
+
+    font = pygame.font.SysFont('verdana', 20)
+    string_rendered = font.render('Cчёт: {}/{}'.format(str(score).split('.')[0], str(maxscore).split('.')[0]), 1, (255, 255, 255))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.x = 170
+    intro_rect.y = 100
+
+    res_score = score/maxscore
+    if res_score >= 0.75:
+        pass
+    elif res_score > 0.5 and res_score < 0.75:
+        pass
+    else:
+        pass
+
+    screen.blit(string_rendered, intro_rect)
 
     buttongroup = pygame.sprite.Group()
 
@@ -691,6 +713,9 @@ menu_running = False
 game_running = False
 level_number = -1
 namelevel = ''
+
+maxscore = 0
+score = 0
 
 while running:
     if start_running:

@@ -4,9 +4,6 @@ import random
 from PIL import Image
 import csv
 
-
-
-
 pygame.init()
 width, height = 500, 500
 size = width, height
@@ -262,6 +259,7 @@ class Oven(pygame.sprite.Sprite):
 
 
 running = True
+
 
 def cut_stage(things_to_place):
     global running
@@ -588,7 +586,49 @@ def menu():
         clock.tick(50)
 
 
-pygame.mixer.music.load('data/vitas.mp3')
+def ending():
+    global running, start_running, namelevel
+
+    fon = pygame.transform.scale(load_image('win.jpg'), (500, 500))
+    dish = pygame.transform.scale(load_image(str(namelevel)+'result.png', -1), (250, 250))
+
+    screen.blit(fon, (0, 0))
+    screen.blit(dish, (110, 100))
+
+    buttongroup = pygame.sprite.Group()
+
+    end_running = True
+
+
+    main_button = load_image('main.png', -1)
+    main_button = pygame.transform.scale(main_button, [150, 50])
+    mainbuttonsprite = pygame.sprite.Sprite()
+    mainbuttonsprite.image = main_button
+    mainbuttonsprite.rect = mainbuttonsprite.image.get_rect()
+    buttongroup.add(mainbuttonsprite)
+    mainbuttonsprite.rect.x = 10
+    mainbuttonsprite.rect.y = 450
+    buttongroup.draw(screen)
+
+    while end_running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                end_running = False
+                running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if mainbuttonsprite.rect.collidepoint(event.pos):
+                    pygame.mixer.music.load('data/rhapsody.mp3')
+                    pygame.mixer.music.set_volume(0.4)
+                    pygame.mixer.music.play(loops=-1)
+                    namelevel = ''
+                    start_running = True
+                    end_running = False
+                    return False
+        pygame.display.flip()
+        clock.tick(50)
+
+
+pygame.mixer.music.load('data/rhapsody.mp3')
 pygame.mixer.music.set_volume(0.4)
 pygame.mixer.music.play(loops=-1)
 start_running = True
@@ -611,7 +651,10 @@ while running:
             namelevel = a
         continue
     if game_running:
-        stage, things_to_place = load_level(str(namelevel)+'.txt')
+        pygame.mixer.music.load('data/vitas.mp3')
+        pygame.mixer.music.set_volume(0.4)
+        pygame.mixer.music.play(loops=-1)
+        stage, things_to_place = load_level(str(namelevel) + '.txt')
         for i in range(len(stage)):
             if stage[i] == 'cut':
                 if not cut_stage(things_to_place[i]):
@@ -619,4 +662,7 @@ while running:
             if stage[i] == 'oven':
                 if not oven_stage(things_to_place[i]):
                     break
+            if stage[i] == 'end':
+                game_running = False
+                ending()
 pygame.quit()

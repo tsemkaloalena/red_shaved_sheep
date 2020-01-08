@@ -262,9 +262,6 @@ class Oven(pygame.sprite.Sprite):
 
 
 running = True
-stage, things_to_place = load_level('1.txt')
-print(stage, things_to_place)
-
 
 def cut_stage(things_to_place):
     global running
@@ -531,7 +528,7 @@ def rules():
 
 
 def menu():
-    global running, start_running, menu_running
+    global running, start_running, menu_running, game_running
     fname = 'menu_info.csv'
     menu, dish_amount, blocked = info_from_csv(os.path.join('data', fname))
     merge_images(menu)
@@ -564,6 +561,7 @@ def menu():
                 if mainbuttonsprite.rect.collidepoint(event.pos):
                     start_running = True
                     menu_running = False
+                    game_running = False
                     return False
                 if event.button == 1:
                     pos_y = pygame.mouse.get_pos()[1]
@@ -572,7 +570,10 @@ def menu():
                         if dish_number in blocked:
                             print('choose another')
                         else:
-                            print(dish_number)
+                            start_running = False
+                            menu_running = False
+                            game_running = True
+                            return dish_number
                 if event.button == 4:
                     scroll_y = min(scroll_y + 15, 178)
                 if event.button == 5:
@@ -595,6 +596,7 @@ rules_running = False
 menu_running = False
 game_running = False
 level_number = -1
+namelevel = ''
 
 while running:
     if start_running:
@@ -604,9 +606,12 @@ while running:
         rules()
         continue
     if menu_running:
-        menu()
+        a = menu()
+        if game_running:
+            namelevel = a
         continue
     if game_running:
+        stage, things_to_place = load_level(str(namelevel)+'.txt')
         for i in range(len(stage)):
             if stage[i] == 'cut':
                 if not cut_stage(things_to_place[i]):

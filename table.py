@@ -550,9 +550,9 @@ def menu():
     buttongroup.add(mainbuttonsprite)
     mainbuttonsprite.rect.x = 10
     mainbuttonsprite.rect.y = 450
-    buttongroup.draw(screen)
 
     while menu_running:
+        screen.fill((255, 255, 255))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -580,6 +580,7 @@ def menu():
         screen.blit(level_pic, (0, scroll_y))
         screen.blit(top, (0, 0))
         screen.blit(bottom, (0, 429))
+        buttongroup.draw(screen)
         pygame.display.flip()
         clock.tick(50)
 

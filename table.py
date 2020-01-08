@@ -347,6 +347,7 @@ class ProductToStuff(pygame.sprite.Sprite):
                     prod.sprite.rect.y = event.pos[1] + prod.dy
                     if pygame.sprite.collide_mask(prod.sprite, self.product):
                         self.add_stuff(prod)
+                        break
 
 
 running = True

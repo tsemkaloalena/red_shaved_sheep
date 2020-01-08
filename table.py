@@ -340,7 +340,6 @@ class ProductToStuff(pygame.sprite.Sprite):
                     prod.move = False
         if event.type == pygame.MOUSEMOTION:
             for i in range(len(self.list)):
-                print(self.list)
                 prod = self.list[i]
                 if prod.move:
                     prod.sprite.rect.x = event.pos[0] + prod.dx
@@ -480,7 +479,6 @@ def cut_stage(things_to_place):
             game_running = False
             lose()
             return False
-            # переделать обработку проигрыша
         pygame.display.flip()
         clock.tick(50)
 
@@ -564,7 +562,7 @@ def stuffing_stage(things_to_place):
     tostuff = things_to_place[0]
     stuffs = things_to_place[1::]
 
-    chicken = ProductToStuff(tostuff.split()[0] + ".png", 100, 100, 200, 200, 230, 200)
+    chicken = ProductToStuff(tostuff.split()[0] + ".png", 200, 200, 300, 300, 240, 150)
 
     font = pygame.font.SysFont('verdana', 20)
     string_rendered = font.render('', 1, (255, 255, 255))
@@ -579,6 +577,7 @@ def stuffing_stage(things_to_place):
 
     startpos = 30
     everything = []
+    done = 0
 
     for i in stuffs:
         st = i.split()
@@ -586,7 +585,7 @@ def stuffing_stage(things_to_place):
         startpos += int(st[2]) + 10
         everything.append(product)
 
-    time = 100 * len(everything)
+    time = 20 * len(everything)
     maxscore += time
     fon = pygame.transform.scale(load_image('table.jpg'), [500, 500])
 
@@ -595,24 +594,41 @@ def stuffing_stage(things_to_place):
     time_rect.x = 470
     time_rect.y = 51
 
-    while running:
-        screen.fill((0, 0, 0))
+    while stuff_running:
+        screen.blit(fon, (0, 0))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.MOUSEBUTTONDOWN and done > 0:
+                if intro_rect.collidepoint(event.pos):
+                    return True
+            if done == 1:
+                create_particles((250, 0))
             chicken.check_event(event)
 
         timetext = font.render(str(time).split('.')[0], 1, (255, 255, 255))
         time_rect = timetext.get_rect()
         time_rect.x = 460
         time_rect.y = 5
-        time -= 0.1
+        if done == 0:
+            time -= 0.1
         if time <= 0:
             stuff_running = False
             start_running = True
             game_running = False
             lose()
             return False
+
+        if len(chicken.list) == 0:
+            done += 1
+            if done == 1:
+                score += time
+                print(score)
+            font = pygame.font.SysFont('verdana', 20)
+            string_rendered = font.render('Перейти к следующему шагу', 1, (255, 255, 255))
+            intro_rect = string_rendered.get_rect()
+            intro_rect.x = 5
+            intro_rect.y = 470
         screen.blit(string_rendered, intro_rect)
         screen.blit(timetext, time_rect)
         screen.blit(recepy, recepy_rect)

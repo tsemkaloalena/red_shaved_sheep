@@ -25,6 +25,20 @@ button = pygame.sprite.Group()
 time = 30
 
 
+class ProductToPourIn(pygame.sprite.Sprite):
+    def __init__(self, product, product_x, product_y, *group):
+        super().__init__(group)
+        self.move = False
+        self.dx = 0
+        self.dy = 0
+        self.sprite = pygame.sprite.Sprite()
+        self.sprite.image = product
+        self.sprite.mask = pygame.mask.from_surface(self.sprite.image)
+        self.sprite.rect = self.sprite.image.get_rect()
+        self.sprite.rect.x = product_x
+        self.sprite.rect.y = product_y
+
+
 class PourInProduct(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
         super().__init__(pour_in_products)
@@ -48,7 +62,9 @@ class PourInProduct(pygame.sprite.Sprite):
         self.image = self.frames[self.cur_frame]
 
 
-salt = PourInProduct(pygame.transform.scale(load_image("salt.png", -1), (66, 120)), 1, 1, 350, 350)
+chicken = ProductToPourIn(pygame.transform.scale(load_image("raw_chicken.png", -1), (200, 200)), 10, 300)
+product_to_salt = pygame.sprite.GroupSingle(chicken.sprite)
+salt = PourInProduct(pygame.transform.scale(load_image("salt.png", -1), (44, 80)), 1, 1, 350, 350)
 pouring_in = False
 
 running = True
@@ -61,17 +77,18 @@ while running:
             if salt.rect.collidepoint(event.pos):
                 if not pouring_in:
                     pour_in_products.remove(salt)
-                    salt = PourInProduct(pygame.transform.scale(load_image("salt2.png", -1), (301, 241)), 2, 1, 100, 50)
+                    salt = PourInProduct(pygame.transform.scale(load_image("salt2.png", -1), (226, 180)), 2, 1, 100, 50)
                     pouring_in = True
     pour_in_products.update()
     if pouring_in:
         time -= 1
     if time <= 0:
         pour_in_products.remove(salt)
-        salt = PourInProduct(pygame.transform.scale(load_image("salt.png", -1), (66, 120)), 1, 1, 350, 350)
+        salt = PourInProduct(pygame.transform.scale(load_image("salt.png", -1), (44, 80)), 1, 1, 350, 350)
         pouring_in = False
         time = 30
     pour_in_products.draw(screen)
+    product_to_salt.draw(screen)
     pygame.display.flip()
     clock.tick(10)
 pygame.quit()

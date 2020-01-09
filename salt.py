@@ -39,6 +39,7 @@ class PourInProduct(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
         super().__init__(pour_in_products)
         self.frames = []
+        self.pouring_in = False
         self.cut_sheet(sheet, columns, rows)
         self.cur_frame = 0
         self.image = self.frames[self.cur_frame]
@@ -61,7 +62,6 @@ class PourInProduct(pygame.sprite.Sprite):
 chicken = ProductToPourIn(pygame.transform.scale(load_image("raw_chicken.png", -1), (200, 200)), 10, 300)
 product_to_pour_in = pygame.sprite.GroupSingle(chicken.sprite)
 salt = PourInProduct(pygame.transform.scale(load_image("salt.png", -1), (44, 80)), 1, 1, 350, 350)
-pouring_in = False
 
 running = True
 while running:
@@ -71,17 +71,17 @@ while running:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if salt.rect.collidepoint(event.pos):
-                if not pouring_in:
+                if not salt.pouring_in:
                     pour_in_products.remove(salt)
                     salt = PourInProduct(pygame.transform.scale(load_image("salt2.png", -1), (226, 180)), 2, 1, 100, 50)
-                    pouring_in = True
+                    salt.pouring_in = True
     pour_in_products.update()
-    if pouring_in:
+    if salt.pouring_in:
         time -= 1
     if time <= 0:
         pour_in_products.remove(salt)
         salt = PourInProduct(pygame.transform.scale(load_image("salt.png", -1), (44, 80)), 1, 1, 350, 350)
-        pouring_in = False
+        salt.pouring_in = False
         time = 30
     pour_in_products.draw(screen)
     product_to_pour_in.draw(screen)

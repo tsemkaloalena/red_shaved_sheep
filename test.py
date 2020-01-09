@@ -478,7 +478,7 @@ def cut_stage(things_to_place):
                     if everything[temp_product].start_to_cut:
                         pygame.draw.circle(everything[temp_product].board, (0, 0, 255), (
                             event.pos[0] - everything[temp_product].x, event.pos[1] - everything[temp_product].y),
-                                           50)
+                                           5)
                         everything[temp_product].spritecut.image = everything[temp_product].board
 
         timetext = font.render(str(time).split('.')[0], 1, (255, 255, 255))

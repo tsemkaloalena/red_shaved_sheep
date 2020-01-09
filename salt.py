@@ -19,9 +19,7 @@ width, height = 500, 500
 size = width, height
 screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
-all_sprites = pygame.sprite.Group()
 pour_in_products = pygame.sprite.Group()
-button = pygame.sprite.Group()
 time = 30
 
 
@@ -29,6 +27,7 @@ class ProductToPourIn(pygame.sprite.Sprite):
     def __init__(self, product, product_x, product_y, *group):
         super().__init__(group)
         self.sprite = pygame.sprite.Sprite()
+        self.image = product
         self.sprite.image = product
         self.sprite.rect = self.sprite.image.get_rect()
         self.sprite.rect.x = product_x

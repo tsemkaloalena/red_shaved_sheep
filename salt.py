@@ -28,12 +28,8 @@ time = 30
 class ProductToPourIn(pygame.sprite.Sprite):
     def __init__(self, product, product_x, product_y, *group):
         super().__init__(group)
-        self.move = False
-        self.dx = 0
-        self.dy = 0
         self.sprite = pygame.sprite.Sprite()
         self.sprite.image = product
-        self.sprite.mask = pygame.mask.from_surface(self.sprite.image)
         self.sprite.rect = self.sprite.image.get_rect()
         self.sprite.rect.x = product_x
         self.sprite.rect.y = product_y
@@ -63,7 +59,7 @@ class PourInProduct(pygame.sprite.Sprite):
 
 
 chicken = ProductToPourIn(pygame.transform.scale(load_image("raw_chicken.png", -1), (200, 200)), 10, 300)
-product_to_salt = pygame.sprite.GroupSingle(chicken.sprite)
+product_to_pour_in = pygame.sprite.GroupSingle(chicken.sprite)
 salt = PourInProduct(pygame.transform.scale(load_image("salt.png", -1), (44, 80)), 1, 1, 350, 350)
 pouring_in = False
 
@@ -88,7 +84,7 @@ while running:
         pouring_in = False
         time = 30
     pour_in_products.draw(screen)
-    product_to_salt.draw(screen)
+    product_to_pour_in.draw(screen)
     pygame.display.flip()
     clock.tick(10)
 pygame.quit()

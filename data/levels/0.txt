@@ -11,8 +11,11 @@ cut_apple 150 120
 cut_carrot 240 63
 cut_rosemary 200 117
 -
-pour_in
+pour_in_salt
 raw_chicken 200 200 250 250 salt 10 350
+-
+pour_in_pepper
+raw_chicken 200 200 250 250 pepper 10 350
 -
 oven
 raw_chicken 200 200

@@ -728,7 +728,106 @@ def salt_stage(things_to_place):
                     if not pour_in.pouring_in:
                         pour_in_products.remove(pour_in)
                         pour_in = PourInProduct(pygame.transform.scale(load_image(st[5] + '2' + '.png', -1), (226, 180)), 2, 1, int(st[3]) + int(st[1]) // 2 - 50 , int(st[4]) - 120, pour_in_products)
-                        print((st[5] + '2' + '.png', (226, 180)), 2, 1, int(st[3]), int(st[4]) + int(st[7]))
+                        pour_in.pouring_in = True
+        pour_in_products.update()
+        if pour_in.pouring_in:
+            pour_in_time -= 1
+        if pour_in_time <= 0:
+            pour_in_products.remove(pour_in)
+            pour_in = PourInProduct(pygame.transform.scale(load_image(st[5] + '.png', -1), (44, 80)), 1, 1, int(st[6]), int(st[7]), pour_in_products)
+            pour_in.pouring_in = False
+            pour_in_time = 30
+
+        timetext = font.render(str(time).split('.')[0], 1, (255, 255, 255))
+        time_rect = timetext.get_rect()
+        time_rect.x = 450
+        time_rect.y = 5
+        screen.blit(string_rendered, intro_rect)
+        screen.blit(timetext, time_rect)
+        screen.blit(recepy, recepy_rect)
+
+        pour_in_products.draw(screen)
+        product_to_pour_in.draw(screen)
+
+        all_sprites.update()
+        # all_sprites.draw(screen)
+        if check_done >= len(everything):
+            if check_done == len(everything):
+                create_particles((250, 0))
+                score += time
+            font = pygame.font.SysFont('verdana', 20)
+            string_rendered = font.render('Перейти к следующему шагу', 1, (255, 255, 255))
+            intro_rect = string_rendered.get_rect()
+            intro_rect.x = 5
+            intro_rect.y = 470
+            check_done = len(everything) + 1
+        if check_done < len(everything):
+            time -= 0.1
+        if time <= 0:
+            pour_in_running = False
+            start_running = True
+            game_running = False
+            lose()
+            return False
+        pygame.display.flip()
+        clock.tick(50)
+
+
+def pepper_stage(things_to_place):
+    global running, maxscore, score, game_running, start_running
+    pour_in_running = True
+    font = pygame.font.SysFont('verdana', 20)
+    string_rendered = font.render('', 1, (255, 255, 255))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.x = 10
+    intro_rect.y = 200
+
+    recepy = font.render('Поперчи курицу', 1, (255, 0, 0))
+    recepy_rect = recepy.get_rect()
+    recepy_rect.x = 10
+    recepy_rect.y = 5
+
+    pour_in_products = pygame.sprite.Group()
+    time = 300
+
+    startpos = 30
+    everything = []
+    positions = []
+
+    st = things_to_place[0].split()
+
+    pour_in_time = 30
+    product = ProductToPourIn(pygame.transform.scale(load_image(st[0] + '.png', -1), (int(st[1]), int(st[2]))), int(st[3]), int(st[4]))
+    product_to_pour_in = pygame.sprite.GroupSingle(product.sprite)
+    pour_in = PourInProduct(pygame.transform.scale(load_image(st[5] + '.png', -1), (44, 80)), 1, 1, int(st[6]), int(st[7]), pour_in_products)
+
+    everything.append(product)
+
+    maxscore += time
+    fon = pygame.transform.scale(load_image('table.jpg'), [500, 500])
+
+    timetext = font.render(str(time), 1, (255, 255, 255))
+    time_rect = timetext.get_rect()
+    time_rect.x = 470
+    time_rect.y = 51
+
+    temp_product = -1
+    check_done = 0
+
+    while pour_in_running:
+        if check_done < 4:
+            check_done = 0
+        screen.blit(fon, (0, 0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pour_in_running = False
+                running = False
+                return False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if pour_in.rect.collidepoint(event.pos):
+                    if not pour_in.pouring_in:
+                        pour_in_products.remove(pour_in)
+                        pour_in = PourInProduct(pygame.transform.scale(load_image(st[5] + '2' + '.png', -1), (226, 180)), 2, 1, int(st[3]) + int(st[1]) // 2 - 50 , int(st[4]) - 120, pour_in_products)
                         pour_in.pouring_in = True
         pour_in_products.update()
         if pour_in.pouring_in:
@@ -1055,8 +1154,11 @@ while running:
             if stage[i] == 'stuff':
                 if not stuffing_stage(things_to_place[i]):
                     break
-            if stage[i] == 'pour_in':
+            if stage[i] == 'pour_in_salt':
                 if not salt_stage(things_to_place[i]):
+                    break
+            if stage[i] == 'pour_in_pepper':
+                if not pepper_stage(things_to_place[i]):
                     break
             if stage[i] == 'end':
                 game_running = False

@@ -13,6 +13,7 @@ screen_rect = (0, 0, width, height)
 all_sprites = pygame.sprite.Group()
 GRAVITY = 0.1
 pygame.display.set_caption("SSB kitchen")
+pygame.display.set_icon(pygame.image.load("data/sheep.ico"))
 
 
 def load_image(name, colorkey=None):

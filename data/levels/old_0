@@ -1,0 +1,26 @@
+cut
+orange 200 130
+rosemary 200 117
+carrot 240 63
+apple 150 120
+-
+grate
+cheese 180 180 80 120 250 250 170 120 259 grch 270 270 100 100
+-
+stuff
+raw_chicken 100 100
+cut_orange 200 130
+cut_apple 150 120
+cut_carrot 240 63
+cut_rosemary 200 117
+-
+pour_in
+raw_chicken 200 200 250 250 salt 10 350
+-
+pour_in
+raw_chicken 200 200 250 250 pepper 10 350
+-
+oven
+raw_chicken 200 200
+-
+end

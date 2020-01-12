@@ -435,12 +435,15 @@ class ProductToGrate(pygame.sprite.Sprite):
     def check_grate(self):
         if pygame.sprite.spritecollideany(self.sprite, self.grater, collided=pygame.sprite.collide_rect_ratio(0.5)):
             self.number_of_swipes -= 1
-        if self.number_of_swipes == 0:
-            self.end_of_game()
-        elif self.number_of_swipes % 10 == 0:
-            self.ch_w -= 3
-            self.ch_h -= 3
-            self.sprite.image = pygame.transform.scale(self.image, (self.ch_w, self.ch_h))
+            if self.number_of_swipes == 0:
+                self.end_of_game()
+            elif self.number_of_swipes % 10 == 0:
+                self.ch_w -= 25
+                self.ch_h -= 25
+                if self.ch_w < 0 or self.ch_w < 0:
+                    self.end_of_game()
+                else:
+                    self.sprite.image = pygame.transform.scale(self.image, (self.ch_w, self.ch_h))
 
 
 running = True
@@ -912,7 +915,7 @@ def grate_stage(things_to_place):
             intro_rect = string_rendered.get_rect()
             intro_rect.x = 5
             intro_rect.y = 470
-        if check_done < pour_times:
+        if not product_to_grate.done:
             time -= 0.1
         if time <= 0:
             grate_running = False

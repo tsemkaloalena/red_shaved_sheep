@@ -658,8 +658,9 @@ def stuffing_stage(things_to_place):
 
     tostuff = things_to_place[0]
     stuffs = things_to_place[1::]
+    st = tostuff.split()
 
-    chicken = ProductToStuff(tostuff.split()[0] + ".png", 200, 200, 300, 300, 240, 150)
+    chicken = ProductToStuff(st[0] + ".png", int(st[1]), int(st[2]), int(st[3]), int(st[4]), int(st[5]), int(st[6]))
 
     font = pygame.font.SysFont('verdana', 20)
     string_rendered = font.render('', 1, (255, 255, 255))

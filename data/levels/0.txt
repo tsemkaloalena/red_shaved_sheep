@@ -8,11 +8,11 @@ grate
 cheese 180 180 25 120 200 200 250 120 100 grch 200 142 250 200
 -
 stuff
-raw_chicken 50 50
-cut_orange 100 65
-cut_apple 75 60
-cut_carrot 120 31
-cut_rosemary 100 58
+raw_chicken 150 150 250 250 240 150
+cut_orange 150 98
+cut_apple 112 90
+cut_carrot 180 47
+cut_rosemary 150 88
 grch 135 96
 -
 pour_in

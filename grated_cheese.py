@@ -67,12 +67,12 @@ class ProductToGrate(pygame.sprite.Sprite):
     def check_grate(self):
         if pygame.sprite.spritecollideany(self.cheese, self.grater, collided=pygame.sprite.collide_rect_ratio(0.5)):
             self.number_of_swipes -= 1
-        if self.number_of_swipes == 0:
-            self.end_of_game()
-        elif self.number_of_swipes % 10 == 0:
-            self.ch_w -= 3
-            self.ch_h -= 3
-            self.cheese.image = pygame.transform.scale(self.image, (self.ch_w, self.ch_h))
+            if self.number_of_swipes == 0:
+                self.end_of_game()
+            elif self.number_of_swipes % 10 == 0:
+                self.ch_w -= 3
+                self.ch_h -= 3
+                self.cheese.image = pygame.transform.scale(self.image, (self.ch_w, self.ch_h))
 
 
 running = True

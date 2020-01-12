@@ -387,7 +387,7 @@ class PourInProduct(pygame.sprite.Sprite):
 
 
 class ProductToGrate(pygame.sprite.Sprite):
-    def __init__(self, grated_product, product_size_x, product_size_y, product_x, product_y, grater_size,
+    def __init__(self, grated_product, product_w, product_h, product_x, product_y, grater_size,
                  grater_x, grater_y, number_of_swipes, result, result_size, result_xy, *group):
         super().__init__(group)
         self.done = False
@@ -404,7 +404,7 @@ class ProductToGrate(pygame.sprite.Sprite):
         self.gratersprite.rect.x = grater_x
         self.gratersprite.rect.y = grater_y
 
-        self.ch_w, self.ch_h = product_size_x, product_size_y
+        self.ch_w, self.ch_h = product_w, product_h
         self.image = load_image(grated_product, -1)
         self.image = pygame.transform.scale(self.image, (self.ch_w, self.ch_h))
         self.sprite = pygame.sprite.Sprite()
@@ -447,7 +447,7 @@ class ProductToGrate(pygame.sprite.Sprite):
 
 
 class ProductToOil(pygame.sprite.Sprite):
-    def __init__(self, product, oiled_product, product_size_x, product_size_y, product_x, product_y, bowl_size, bowl_x,
+    def __init__(self, product, oiled_product, product_w, product_h, product_x, product_y, bowl_size, bowl_x,
                  bowl_y, *group):
         super().__init__(group)
         self.done = False
@@ -470,7 +470,7 @@ class ProductToOil(pygame.sprite.Sprite):
         self.drawing = True
         self.start_to_oil = False
         self.x, self.y = product_x, product_y
-        self.img_size = product_size_x, product_size_y
+        self.img_size = product_w, product_h
         self.product = pygame.sprite.Group()  # сам предмет
         self.already_oil = pygame.sprite.Group()  # линии, которые остаются, чтобы было видно, где мы уже намазали масло
 
@@ -669,8 +669,7 @@ def cut_stage(things_to_place):
                 if everything[temp_product].drawing:
                     if everything[temp_product].start_to_cut:
                         pygame.draw.circle(everything[temp_product].board, (0, 0, 255), (
-                            event.pos[0] - everything[temp_product].x, event.pos[1] - everything[temp_product].y),
-                                           50)
+                            event.pos[0] - everything[temp_product].x, event.pos[1] - everything[temp_product].y), 5)
                         everything[temp_product].spritecut.image = everything[temp_product].board
 
         timetext = font.render(str(time).split('.')[0], 1, (255, 255, 255))
@@ -1075,8 +1074,8 @@ def oil_stage(things_to_place):
 
     time = 300
 
-    # product_to_oil = ProductToGrate(st[0] + '.png', int(st[1]))
-    oil = ProductToOil("raw_chicken.png", "oiled_raw_chicken.png", 200, 200, 50, 100, 100, 300, 300)
+    oil = ProductToOil(st[0] + '.png', st[1] + '.png', int(st[2]), int(st[3]), int(st[4]), int(st[5]), int(st[6]),
+                       int(st[7]), int(st[8]))
 
     maxscore += time
     fon = pygame.transform.scale(load_image('table.jpg'), [500, 500])

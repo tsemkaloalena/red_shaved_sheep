@@ -386,6 +386,63 @@ class PourInProduct(pygame.sprite.Sprite):
         self.image = self.frames[self.cur_frame]
 
 
+class ProductToGrate(pygame.sprite.Sprite):
+    def __init__(self, grated_product, product_size_x, product_size_y, product_x, product_y, grater_size,
+                 grater_x, grater_y, number_of_swipes, result, result_size, result_xy,  *group):
+        super().__init__(group)
+        self.done = False
+
+        self.grated = pygame.sprite.Group()
+        self.grater = pygame.sprite.Group()
+
+        self.gr = load_image('grater.png', -1)
+        self.gr = pygame.transform.scale(self.gr, grater_size)
+        self.gratersprite = pygame.sprite.Sprite()
+        self.gratersprite.image = self.gr
+        self.gratersprite.rect = self.gratersprite.image.get_rect()
+        self.grater.add(self.gratersprite)
+        self.gratersprite.rect.x = grater_x
+        self.gratersprite.rect.y = grater_y
+
+        self.ch_w, self.ch_h = product_size_x, product_size_y
+        self.image = load_image(grated_product, -1)
+        self.image = pygame.transform.scale(self.image, (self.ch_w, self.ch_h))
+        self.sprite = pygame.sprite.Sprite()
+        self.sprite.image = self.image
+        self.sprite.rect = self.sprite.image.get_rect()
+        self.grated.add(self.sprite)
+        self.sprite.rect.x = product_x
+        self.sprite.rect.y = product_y
+        self.number_of_swipes = number_of_swipes
+
+        self.result = result
+        self.result_size = result_size
+        self.result_xy = result_xy
+
+    def end_of_game(self):
+        self.sprite.kill()
+        self.gratersprite.kill()
+        self.image_gr_ch = load_image(self.result, -1)
+        self.image_gr_ch = pygame.transform.scale(self.image_gr_ch, self.result_size)
+        self.gr_ch = pygame.sprite.Sprite()
+        self.gr_ch.image = self.image_gr_ch
+        self.gr_ch.rect = self.gr_ch.image.get_rect()
+        self.grated.add(self.gr_ch)
+        self.gr_ch.rect.x = self.result_xy[0]
+        self.gr_ch.rect.y = self.result_xy[1]
+        self.done = True
+
+    def check_grate(self):
+        if pygame.sprite.spritecollideany(self.sprite, self.grater, collided=pygame.sprite.collide_rect_ratio(0.5)):
+            self.number_of_swipes -= 1
+        if self.number_of_swipes == 0:
+            self.end_of_game()
+        elif self.number_of_swipes % 10 == 0:
+            self.ch_w -= 3
+            self.ch_h -= 3
+            self.sprite.image = pygame.transform.scale(self.image, (self.ch_w, self.ch_h))
+
+
 running = True
 
 
@@ -636,6 +693,7 @@ def stuffing_stage(things_to_place):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                return False
             if event.type == pygame.MOUSEBUTTONDOWN and done > 0:
                 if intro_rect.collidepoint(event.pos):
                     return True
@@ -704,7 +762,6 @@ def pour_in_stage(things_to_place):
     product_to_pour_in = pygame.sprite.GroupSingle(product.sprite)
     pour_in = PourInProduct(pygame.transform.scale(load_image(st[5] + '.png', -1), (44, 80)), 1, 1, int(st[6]),
                             int(st[7]), pour_in_products)
-
 
     maxscore += time
     fon = pygame.transform.scale(load_image('table.jpg'), [500, 500])
@@ -775,6 +832,90 @@ def pour_in_stage(things_to_place):
             time -= 0.1
         if time <= 0:
             pour_in_running = False
+            start_running = True
+            game_running = False
+            lose()
+            return False
+        pygame.display.flip()
+        clock.tick(50)
+
+
+def grate_stage(things_to_place):
+    global running, maxscore, score, game_running, start_running
+    grate_running = True
+    font = pygame.font.SysFont('verdana', 20)
+    string_rendered = font.render('', 1, (255, 255, 255))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.x = 10
+    intro_rect.y = 200
+
+    st = things_to_place[0].split()
+    if st[0] == 'cheese':
+        recepy = font.render('Потри сыр', 1, (255, 0, 0))
+    recepy_rect = recepy.get_rect()
+    recepy_rect.x = 10
+    recepy_rect.y = 5
+
+    time = 300
+
+    product_to_grate = ProductToGrate(st[0] + '.png', int(st[1]), int(st[2]), int(st[3]), int(st[4]), (int(st[5]), int(st[6])), int(st[7]), int(st[8]), int(st[9]), st[10] + '.png', (int(st[11]), int(st[12])), (int(st[13]), int(st[14])))
+
+    maxscore += time
+    fon = pygame.transform.scale(load_image('table.jpg'), [500, 500])
+
+    timetext = font.render(str(time), 1, (255, 255, 255))
+    time_rect = timetext.get_rect()
+    time_rect.x = 470
+    time_rect.y = 51
+
+    pour_times = 5
+    check_done = 0
+
+    grate_moving = False
+
+    while grate_running:
+        screen.blit(fon, (0, 0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                grate_running = False
+                running = False
+                return False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                grate_moving = True
+                if intro_rect.collidepoint(event.pos):
+                    return True
+            if event.type == pygame.MOUSEBUTTONUP:
+                grate_moving = False
+            if event.type == pygame.MOUSEMOTION and grate_moving:
+                product_to_grate.check_grate()
+                x, y = pygame.mouse.get_pos()
+                product_to_grate.sprite.rect.x = x - 50
+                product_to_grate.sprite.rect.y = y - 50
+
+        product_to_grate.grater.draw(screen)
+        product_to_grate.grated.draw(screen)
+
+        timetext = font.render(str(time).split('.')[0], 1, (255, 255, 255))
+        time_rect = timetext.get_rect()
+        time_rect.x = 450
+        time_rect.y = 5
+        screen.blit(string_rendered, intro_rect)
+        screen.blit(timetext, time_rect)
+        screen.blit(recepy, recepy_rect)
+
+        all_sprites.update()
+        if product_to_grate.done:
+            create_particles((250, 0))
+            score += time
+            font = pygame.font.SysFont('verdana', 20)
+            string_rendered = font.render('Перейти к следующему шагу', 1, (255, 255, 255))
+            intro_rect = string_rendered.get_rect()
+            intro_rect.x = 5
+            intro_rect.y = 470
+        if check_done < pour_times:
+            time -= 0.1
+        if time <= 0:
+            grate_running = False
             start_running = True
             game_running = False
             lose()
@@ -1057,6 +1198,9 @@ while running:
         for i in range(len(stage)):
             if stage[i] == 'cut':
                 if not cut_stage(things_to_place[i]):
+                    break
+            if stage[i] == 'grate':
+                if not grate_stage(things_to_place[i]):
                     break
             if stage[i] == 'oven':
                 if not oven_stage(things_to_place[i]):

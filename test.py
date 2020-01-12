@@ -479,7 +479,7 @@ def cut_stage(things_to_place):
                     if everything[temp_product].start_to_cut:
                         pygame.draw.circle(everything[temp_product].board, (0, 0, 255), (
                             event.pos[0] - everything[temp_product].x, event.pos[1] - everything[temp_product].y),
-                                           5)
+                                           50)
                         everything[temp_product].spritecut.image = everything[temp_product].board
 
         timetext = font.render(str(time).split('.')[0], 1, (255, 255, 255))
@@ -696,7 +696,6 @@ def pour_in_stage(things_to_place):
     time = 300
 
     startpos = 30
-    everything = []
     positions = []
 
     pour_in_time = 30
@@ -706,7 +705,6 @@ def pour_in_stage(things_to_place):
     pour_in = PourInProduct(pygame.transform.scale(load_image(st[5] + '.png', -1), (44, 80)), 1, 1, int(st[6]),
                             int(st[7]), pour_in_products)
 
-    everything.append(product)
 
     maxscore += time
     fon = pygame.transform.scale(load_image('table.jpg'), [500, 500])
@@ -715,8 +713,9 @@ def pour_in_stage(things_to_place):
     time_rect = timetext.get_rect()
     time_rect.x = 470
     time_rect.y = 51
-
+    pour_in_done = 0
     temp_product = -1
+    pour_times = 5
     check_done = 0
 
     while pour_in_running:
@@ -729,6 +728,9 @@ def pour_in_stage(things_to_place):
                 running = False
                 return False
             if event.type == pygame.MOUSEBUTTONDOWN:
+                if pour_in_done >= pour_times:
+                    if intro_rect.collidepoint(event.pos):
+                        return True
                 if pour_in.rect.collidepoint(event.pos):
                     if not pour_in.pouring_in:
                         pour_in_products.remove(pour_in)
@@ -745,6 +747,8 @@ def pour_in_stage(things_to_place):
                                     int(st[7]), pour_in_products)
             pour_in.pouring_in = False
             pour_in_time = 30
+            pour_in_done += 1
+            print(pour_in_done)
 
         timetext = font.render(str(time).split('.')[0], 1, (255, 255, 255))
         time_rect = timetext.get_rect()
@@ -759,17 +763,15 @@ def pour_in_stage(things_to_place):
 
         all_sprites.update()
         # all_sprites.draw(screen)
-        if check_done >= len(everything):
-            if check_done == len(everything):
-                create_particles((250, 0))
-                score += time
+        if pour_in_done >= pour_times:
+            create_particles((250, 0))
+            score += time
             font = pygame.font.SysFont('verdana', 20)
             string_rendered = font.render('Перейти к следующему шагу', 1, (255, 255, 255))
             intro_rect = string_rendered.get_rect()
             intro_rect.x = 5
             intro_rect.y = 470
-            check_done = len(everything) + 1
-        if check_done < len(everything):
+        if check_done < pour_times:
             time -= 0.1
         if time <= 0:
             pour_in_running = False

@@ -1096,6 +1096,7 @@ def oil_stage(things_to_place):
                 return False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if intro_rect.collidepoint(event.pos):
+                    pygame.mouse.set_visible(True)
                     return True
             oil.check_event(event)
         oil.draw_on_screen()
@@ -1316,11 +1317,9 @@ def ending():
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if mainbuttonsprite.rect.collidepoint(event.pos):
-                    '''
                     pygame.mixer.music.load('data/rhapsody.mp3')
                     pygame.mixer.music.set_volume(0.4)
                     pygame.mixer.music.play(loops=-1)
-                    '''
                     namelevel = ''
                     start_running = True
                     end_running = False
@@ -1334,11 +1333,10 @@ def lose():
 
     fon = pygame.transform.scale(load_image('lose.jpg'), (500, 500))
     screen.blit(fon, (0, 0))
-    '''
-        pygame.mixer.music.load('data/directedby.mp3')
-        pygame.mixer.music.set_volume(0.4)
-        pygame.mixer.music.play(loops=-1)
-    '''
+
+    pygame.mixer.music.load('data/directedby.mp3')
+    pygame.mixer.music.set_volume(0.4)
+    pygame.mixer.music.play(loops=-1)
 
     buttongroup = pygame.sprite.Group()
 
@@ -1361,11 +1359,9 @@ def lose():
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if mainbuttonsprite.rect.collidepoint(event.pos):
-                    '''
                     pygame.mixer.music.load('data/rhapsody.mp3')
                     pygame.mixer.music.set_volume(0.4)
                     pygame.mixer.music.play(loops=-1)
-                    '''
                     namelevel = ''
                     start_running = True
                     end_running = False
@@ -1373,11 +1369,10 @@ def lose():
         pygame.display.flip()
         clock.tick(50)
 
-'''
+
 pygame.mixer.music.load('data/rhapsody.mp3')
 pygame.mixer.music.set_volume(0.4)
 pygame.mixer.music.play(loops=-1)
-'''
 start_running = True
 rules_running = False
 menu_running = False
@@ -1402,11 +1397,9 @@ while running:
             namelevel = a
         continue
     if game_running:
-        '''
         pygame.mixer.music.load('data/vitas.mp3')
         pygame.mixer.music.set_volume(0.4)
         pygame.mixer.music.play(loops=-1)
-        '''
         stage, things_to_place = load_level(str(namelevel) + '.txt')
         for i in range(len(stage)):
             if stage[i] == 'cut':

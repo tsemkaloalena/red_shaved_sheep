@@ -877,9 +877,9 @@ def pour_in_stage(things_to_place):
 
     st = things_to_place[0].split()
     if st[5] == 'salt':
-        recepy = font.render('Посоли курицу', 1, (255, 0, 0))
+        recepy = font.render('Посоли курицу 5 раз', 1, (255, 0, 0))
     elif st[5] == 'pepper':
-        recepy = font.render('Поперчи курицу', 1, (255, 0, 0))
+        recepy = font.render('Поперчи курицу 5 раз', 1, (255, 0, 0))
     recepy_rect = recepy.get_rect()
     recepy_rect.x = 10
     recepy_rect.y = 5

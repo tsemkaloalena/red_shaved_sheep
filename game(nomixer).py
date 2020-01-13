@@ -1096,6 +1096,7 @@ def oil_stage(things_to_place):
                 return False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if intro_rect.collidepoint(event.pos):
+                    pygame.mouse.set_visible(True)
                     return True
             oil.check_event(event)
         oil.draw_on_screen()

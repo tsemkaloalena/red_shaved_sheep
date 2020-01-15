@@ -55,6 +55,16 @@ def info_from_csv(fname):
         blocked = list(map(lambda x: int(x[1:3]), blocked))
         return pictures, len(pictures), blocked
 
+def result_to_csv(dish, score):
+    with open(os.path.join('data', 'menu_info.csv'), 'r', encoding="utf8", ) as csvfile:
+            reader = list(csv.reader(csvfile, delimiter=';', quotechar='"'))
+            for i in range(1, len(reader)):
+                if int(reader[i][1]) == dish and score > int(reader[i][2]):
+                    reader[i] = ['0', '0'+ str(dish), str(score)]
+    with open(os.path.join('data', 'menu_info.csv'), 'w', newline="") as csvwr:
+        writer = csv.writer(csvwr, delimiter=';', quotechar='"')
+        for line in reader:
+            writer.writerow(line)
 
 def merge_images(pictures):
     images = []
@@ -852,7 +862,6 @@ def stuffing_stage(things_to_place):
             done += 1
             if done == 1:
                 score += time
-                print(score)
             font = pygame.font.SysFont('verdana', 20)
             string_rendered = font.render('Перейти к следующему шагу', 1, (255, 255, 255))
             intro_rect = string_rendered.get_rect()
@@ -955,14 +964,16 @@ def pour_in_stage(things_to_place):
         all_sprites.update()
         # all_sprites.draw(screen)
         if pour_in_done >= pour_times:
-            create_particles((250, 0))
-            score += time
+        #    create_particles((250, 0))
+            if pour_in_done == pour_times:
+                score += time
+                pour_in_done += 1
             font = pygame.font.SysFont('verdana', 20)
             string_rendered = font.render('Перейти к следующему шагу', 1, (255, 255, 255))
             intro_rect = string_rendered.get_rect()
             intro_rect.x = 5
             intro_rect.y = 470
-        if check_done < pour_times:
+        if pour_in_done < pour_times:
             time -= 0.1
         if time <= 0:
             pour_in_running = False
@@ -1016,6 +1027,7 @@ def grate_stage(things_to_place):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 grate_moving = True
                 if intro_rect.collidepoint(event.pos):
+                    score += time
                     return True
             if event.type == pygame.MOUSEBUTTONUP:
                 grate_moving = False
@@ -1039,7 +1051,6 @@ def grate_stage(things_to_place):
         all_sprites.update()
         if product_to_grate.done:
             create_particles((250, 0))
-            score += time
             font = pygame.font.SysFont('verdana', 20)
             string_rendered = font.render('Перейти к следующему шагу', 1, (255, 255, 255))
             intro_rect = string_rendered.get_rect()
@@ -1097,6 +1108,7 @@ def oil_stage(things_to_place):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if intro_rect.collidepoint(event.pos):
                     pygame.mouse.set_visible(True)
+                    score += time
                     return True
             oil.check_event(event)
         oil.draw_on_screen()
@@ -1112,7 +1124,6 @@ def oil_stage(things_to_place):
         all_sprites.update()
         if oil.done:
             create_particles((250, 0))
-            score += time
             font = pygame.font.SysFont('verdana', 20)
             string_rendered = font.render('Перейти к следующему шагу', 1, (255, 255, 255))
             intro_rect = string_rendered.get_rect()
@@ -1287,12 +1298,14 @@ def ending():
     intro_rect.y = 100
 
     res_score = score / maxscore
-    if res_score >= 0.75:
-        pass
-    elif res_score > 0.5 and res_score < 0.75:
-        pass
+    if res_score >= 0.9:
+        result_to_csv(namelevel, 3)
+    elif res_score >= 0.65 and res_score < 0.8:
+        result_to_csv(namelevel, 2)
+    elif res_score >= 0.45 and res_score < 0.65:
+        result_to_csv(namelevel, 1)
     else:
-        pass
+        result_to_csv(namelevel, 0)
 
     screen.blit(string_rendered, intro_rect)
 
@@ -1335,10 +1348,11 @@ def lose():
 
     fon = pygame.transform.scale(load_image('lose.jpg'), (500, 500))
     screen.blit(fon, (0, 0))
+
     '''
-        pygame.mixer.music.load('data/directedby.mp3')
-        pygame.mixer.music.set_volume(0.4)
-        pygame.mixer.music.play(loops=-1)
+    pygame.mixer.music.load('data/directedby.mp3')
+    pygame.mixer.music.set_volume(0.4)
+    pygame.mixer.music.play(loops=-1)
     '''
 
     buttongroup = pygame.sprite.Group()
@@ -1374,6 +1388,7 @@ def lose():
         pygame.display.flip()
         clock.tick(50)
 
+
 '''
 pygame.mixer.music.load('data/rhapsody.mp3')
 pygame.mixer.music.set_volume(0.4)
@@ -1401,6 +1416,7 @@ while running:
         a = menu()
         if game_running:
             namelevel = a
+            print(namelevel)
         continue
     if game_running:
         '''

@@ -877,9 +877,9 @@ def pour_in_stage(things_to_place):
 
     st = things_to_place[0].split()
     if st[5] == 'salt':
-        recepy = font.render('Посоли курицу', 1, (255, 0, 0))
+        recepy = font.render('Посоли курицу 5 раз', 1, (255, 0, 0))
     elif st[5] == 'pepper':
-        recepy = font.render('Поперчи курицу', 1, (255, 0, 0))
+        recepy = font.render('Поперчи курицу 5 раз', 1, (255, 0, 0))
     recepy_rect = recepy.get_rect()
     recepy_rect.x = 10
     recepy_rect.y = 5
@@ -1018,6 +1018,7 @@ def grate_stage(things_to_place):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 grate_moving = True
                 if intro_rect.collidepoint(event.pos):
+                    score += time
                     return True
             if event.type == pygame.MOUSEBUTTONUP:
                 grate_moving = False
@@ -1041,7 +1042,6 @@ def grate_stage(things_to_place):
         all_sprites.update()
         if product_to_grate.done:
             create_particles((250, 0))
-            score += time
             font = pygame.font.SysFont('verdana', 20)
             string_rendered = font.render('Перейти к следующему шагу', 1, (255, 255, 255))
             intro_rect = string_rendered.get_rect()
@@ -1099,6 +1099,7 @@ def oil_stage(things_to_place):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if intro_rect.collidepoint(event.pos):
                     pygame.mouse.set_visible(True)
+                    score += time
                     return True
             oil.check_event(event)
         oil.draw_on_screen()
@@ -1114,7 +1115,6 @@ def oil_stage(things_to_place):
         all_sprites.update()
         if oil.done:
             create_particles((250, 0))
-            score += time
             font = pygame.font.SysFont('verdana', 20)
             string_rendered = font.render('Перейти к следующему шагу', 1, (255, 255, 255))
             intro_rect = string_rendered.get_rect()

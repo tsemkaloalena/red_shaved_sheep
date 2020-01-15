@@ -53,8 +53,19 @@ def info_from_csv(fname):
         pictures = list(map(lambda x: ''.join(x) + '.png', reader))[1:]
         blocked = list(filter(lambda x: x[0] == '1', pictures))
         blocked = list(map(lambda x: int(x[1:3]), blocked))
+        print(pictures, len(pictures), blocked)
         return pictures, len(pictures), blocked
 
+def result_to_csv(dish, score):
+    with open(os.path.join('data', 'menu_info.csv'), 'r', encoding="utf8", ) as csvfile:
+            reader = list(csv.reader(csvfile, delimiter=';', quotechar='"'))
+            for i in range(1, len(reader)):
+                if int(reader[i][1]) == dish and score > int(reader[i][2]):
+                    reader[i] = ['0', '0'+ str(dish), str(score)]
+    with open(os.path.join('data', 'menu_info.csv'), 'w', newline="") as csvwr:
+        writer = csv.writer(csvwr, delimiter=';', quotechar='"')
+        for line in reader:
+            writer.writerow(line)
 
 def merge_images(pictures):
     images = []
@@ -1289,12 +1300,14 @@ def ending():
     intro_rect.y = 100
 
     res_score = score / maxscore
-    if res_score >= 0.75:
-        pass
-    elif res_score > 0.5 and res_score < 0.75:
-        pass
+    if res_score >= 0.9:
+        result_to_csv(namelevel, 3)
+    elif res_score >= 0.65 and res_score < 0.8:
+        result_to_csv(namelevel, 2)
+    elif res_score >= 0.45 and res_score < 0.65:
+        result_to_csv(namelevel, 1)
     else:
-        pass
+        result_to_csv(namelevel, 0)
 
     screen.blit(string_rendered, intro_rect)
 
@@ -1397,6 +1410,7 @@ while running:
         a = menu()
         if game_running:
             namelevel = a
+            print(namelevel)
         continue
     if game_running:
         pygame.mixer.music.load('data/vitas.mp3')

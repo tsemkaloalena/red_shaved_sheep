@@ -955,8 +955,10 @@ def pour_in_stage(things_to_place):
         all_sprites.update()
         # all_sprites.draw(screen)
         if pour_in_done >= pour_times:
-            create_particles((250, 0))
-            score += time
+        #    create_particles((250, 0))
+            if pour_in_done == pour_times:
+                score += time
+                pour_in_time += 1
             font = pygame.font.SysFont('verdana', 20)
             string_rendered = font.render('Перейти к следующему шагу', 1, (255, 255, 255))
             intro_rect = string_rendered.get_rect()

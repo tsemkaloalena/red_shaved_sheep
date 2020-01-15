@@ -53,7 +53,6 @@ def info_from_csv(fname):
         pictures = list(map(lambda x: ''.join(x) + '.png', reader))[1:]
         blocked = list(filter(lambda x: x[0] == '1', pictures))
         blocked = list(map(lambda x: int(x[1:3]), blocked))
-        print(pictures, len(pictures), blocked)
         return pictures, len(pictures), blocked
 
 def result_to_csv(dish, score):
@@ -863,7 +862,6 @@ def stuffing_stage(things_to_place):
             done += 1
             if done == 1:
                 score += time
-                print(score)
             font = pygame.font.SysFont('verdana', 20)
             string_rendered = font.render('Перейти к следующему шагу', 1, (255, 255, 255))
             intro_rect = string_rendered.get_rect()
